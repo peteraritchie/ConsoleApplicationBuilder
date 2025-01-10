@@ -8,6 +8,7 @@ Sometimes you just want to create the simplest of applications to do something v
 
 This is where ConsoleApplicationBuilder comes into play.
 
+```csharp
 public class Program
 {
 	public static void Main(string[] args)
@@ -21,6 +22,7 @@ public class Program
         // ...
     }
 }
+```
 
 ## Scaffolding
 
