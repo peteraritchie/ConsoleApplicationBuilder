@@ -11,11 +11,11 @@ This is where ConsoleApplicationBuilder comes into play.
 ```csharp
 public class Program
 {
-	public static void Main(string[] args)
-	{
-	    var program = ConsoleApplication.CreateBuilder(args).Build<Program>();
+    public static void Main(string[] args)
+    {
+        var program = ConsoleApplication.CreateBuilder(args).Build<Program>();
         program.Run();
-	}
+    }
 
     public void Run()
     {
