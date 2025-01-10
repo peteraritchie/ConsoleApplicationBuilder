@@ -26,6 +26,7 @@ $solution = [Solution]::Create($srcDir, $solutionName);
 
 $libraryProject = $solution.NewClassLibraryProject("$($rootNamespace)");
 $libraryProject.AddPackageReference("Microsoft.Extensions.Hosting");
+$libraryProject.AddPackageReference("Microsoft.Extensions.Http");
 
 $testProject = $solution.NewTestProject("$($rootNamespace).Tests", $libraryProject);
 $testProject.UpdatePackageReference('xunit');
