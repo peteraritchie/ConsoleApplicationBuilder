@@ -26,11 +26,13 @@ variables:
   testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
-  versionSuffix: '-rc'
-  shortVersion: '$(majorVersion).$(minorVersion)$(versionSuffx)'
+  shortVersion: '$(majorVersion).$(minorVersion)'
   patchVersion: $[counter(variables['shortVersion'], 1)]
-  productVersion: $(shortVersion).$(Build.BuildId)
-  AssemblyVersion: $(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)
+  versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
+  versionSuffixType: '-rc'
+  buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
+  buildVersion: $[counter(variables['buildVersionKey'], 1)]
+  versionSuffix: '$(versionSuffixType)$(buildVersion)'
   ${{ if eq(parameters.verbosity, 'Quiet') }}:
     dotnetVerbosity: q # Quiet
   ${{ elseif eq(parameters.verbosity, 'Detailed') }}:
@@ -64,8 +66,8 @@ steps:
           -c $(buildConfiguration)
           --nologo
           -v $(dotnetVerbosity)
-          /p:ProductVersion=$(productVersion)
-          /p:Version=$(assemblyVersion)
+          /p:VersionSuffx=$(versionSuffix)
+          /p:VersionPrefix=$(versionPrefix)
           /clp:ErrorsOnly
           --collect "Code coverage"
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
