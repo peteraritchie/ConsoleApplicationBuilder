@@ -1,5 +1,7 @@
 # ConsoleApplicationBuilder
 
+![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/Pri/ConsoleApplicationBuilder/18)
+
 .NET has had a Dependency Injection (DI) feature for a while now. Out-of-the-box geneated ASP.NET applications and console worker project templates create startup code that creates a service collection and service provider (Dependency Injection Container), developers just need to add their services to the service collection and perform any configuration required.
 
 Except for simple console applications.
