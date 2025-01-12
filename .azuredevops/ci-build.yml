@@ -61,10 +61,10 @@ steps:
       arguments: >-
           -c $(buildConfiguration)
           --nologo
+          --collect "Code coverage"
           -v $(dotnetVerbosity)
           /p:Version=$(assemblyVersion)
           /clp:ErrorsOnly
-          --collect 'Code coverage'
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
   - task: PublishPipelineArtifact@1
