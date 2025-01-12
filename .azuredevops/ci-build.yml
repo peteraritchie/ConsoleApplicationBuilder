@@ -21,10 +21,9 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  solutionDirectory: 'src'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
-  testProjects: 'Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
+  testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
   shortVersion: '$(majorVersion).$(minorVersion)'
@@ -66,7 +65,6 @@ steps:
           -v $(dotnetVerbosity)
           /p:Version=$(assemblyVersion)
           /clp:ErrorsOnly
-      workingDirectory: $(Build.SourcesDirectory)/$(solutionDirectory)
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
   - task: PublishPipelineArtifact@1
