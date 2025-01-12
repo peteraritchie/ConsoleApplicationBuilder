@@ -38,6 +38,8 @@ variables:
     dotnetVerbosity: m # Minimal
 
 steps:
+  - script: echo $(dotNetVersion);
+
   - task: UseDotNet@2
     displayName: 'Use .NET SDK $(dotNetVersion)'
     inputs:
