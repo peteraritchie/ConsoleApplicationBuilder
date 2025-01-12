@@ -21,8 +21,10 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
+  solutionDirectory: '.'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
+  testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
   shortVersion: '$(majorVersion).$(minorVersion)'
@@ -56,7 +58,7 @@ steps:
     displayName: 'Dotnet Test - $(buildConfiguration)'
     inputs:
       command: 'test'
-      projects: 'src/**/*.csproj'
+      projects: $(testProjects)
       arguments: >-
           -c $(buildConfiguration)
           --nologo
