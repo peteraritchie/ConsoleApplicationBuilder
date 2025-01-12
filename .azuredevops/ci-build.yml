@@ -67,7 +67,7 @@ steps:
           --collect "Code coverage"
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
-  - task: Copy package to artifact staging directory
+  - task: CopyFiles@2
     displayName: 'Copy package to artifact staging directory'
     inputs:
       SourceFolder: 'src'
