@@ -55,16 +55,16 @@ steps:
     # run tests and publish results/coverage to Azure DevOps
     displayName: 'Dotnet Test - $(buildConfiguration)'
     inputs:
-    command: 'test'
-    arguments: >-
-        -c $(buildConfiguration)
-        --nologo
-        --collect "Code coverage"
-        -v $(dotnetVerbosity)
-        /p:Version=$(assemblyVersion)
-        /clp:ErrorsOnly
-    workingDirectory: $(Build.SourcesDirectory)/$(solutionDirectory)
-    testRunTitle: 'Dotnet Test - $(buildConfiguration)'
+      command: 'test'
+      arguments: >-
+          -c $(buildConfiguration)
+          --nologo
+          --collect "Code coverage"
+          -v $(dotnetVerbosity)
+          /p:Version=$(assemblyVersion)
+          /clp:ErrorsOnly
+      workingDirectory: $(Build.SourcesDirectory)/$(solutionDirectory)
+      testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
   - task: PublishPipelineArtifact@1
     inputs:

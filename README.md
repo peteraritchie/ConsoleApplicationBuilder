@@ -23,10 +23,14 @@ public class Program
     }
 }
 ```
+
 ## Building, etc.
 
 - Build Package:
 - dotnet build -c Release /p:Version=0.1.0.0-rc
+
+## Archiecturally-significant Decisions
+- Azure YAML pipeline files will be stored in the root of the repository, in a folder named `.azuredevops\azure-pipelines`.
 
 ## Scaffolding
 
