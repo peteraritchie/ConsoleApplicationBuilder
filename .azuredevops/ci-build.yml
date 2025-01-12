@@ -67,6 +67,13 @@ steps:
           --collect "Code coverage"
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
+  - task: Copy package to artifact staging directory
+    displayName: 'Copy package to artifact staging directory'
+    inputs:
+      SourceFolder: 'src'
+      Contents: '**/*.nupkg'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)'

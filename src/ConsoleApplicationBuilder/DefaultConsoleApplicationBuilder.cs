@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Pri.ConsoleApplicationBuilder;
@@ -78,24 +77,20 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 		};
 		return;
 
-		static bool GetReloadConfigOnChangeValue(ConfigurationManager configuration)
+		static bool GetReloadConfigOnChangeValue(IConfiguration configuration)
 		{
 			const string reloadConfigOnChangeKey = "hostBuilder:reloadConfigOnChange";
-			if (configuration[reloadConfigOnChangeKey] is not { } reloadConfigOnChange)
-			{
-				return true;
-			}
-
-			if (!bool.TryParse(reloadConfigOnChange, out bool result))
-			{
-				throw new InvalidOperationException($"Failed to convert configuration value at '{configuration.GetSection(reloadConfigOnChangeKey).Path}' to type '{typeof(bool)}'.");
-			}
-			return result;
+			return configuration[reloadConfigOnChangeKey] is not { } reloadConfigOnChange ||
+			       (bool.TryParse(reloadConfigOnChange, out bool result)
+				       ? result
+				       : throw new InvalidOperationException(
+					       $"Failed to convert configuration value at '{configuration.GetSection(reloadConfigOnChangeKey).Path}' to type '{typeof(bool)}'."));
 		}
 	}
 
 	private static ApplicationEnvironment CreateEnvironment(ConsoleApplicationBuilderSettings settings,
-		IConfigurationManager configuration)
+		// ReSharper disable once SuggestBaseTypeForParameter
+		ConfigurationManager configuration)
 	{
 		// ConsoleApplicationBuilderSettings override all other config sources.
 		List<KeyValuePair<string, string?>>? optionList = null;

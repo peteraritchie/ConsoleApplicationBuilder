@@ -17,10 +17,7 @@ public class ConfigureContainerShould
 	public void WorkWithOtherProviderType()
 	{
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.ConfigureContainer(new AutofacServiceProviderFactory(), container =>
-		{
-			container.RegisterType<MyService>();
-		});
+		builder.ConfigureContainer(new AutofacServiceProviderFactory(), container => container.RegisterType<MyService>());
 		var o = builder.Build<ProgramWithDependency>();
 		Assert.NotNull(o);
 		Assert.NotNull(o.MyService);
