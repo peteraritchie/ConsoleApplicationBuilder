@@ -56,6 +56,7 @@ steps:
     displayName: 'Dotnet Test - $(buildConfiguration)'
     inputs:
       command: 'test'
+      projects: 'src/**/*.csproj'
       arguments: >-
           -c $(buildConfiguration)
           --nologo
