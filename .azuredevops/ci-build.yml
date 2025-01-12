@@ -26,10 +26,10 @@ variables:
   testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
-  versionPrefix: ''
-  shortVersion: '$(majorVersion).$(minorVersion)'
+  patchSuffix: '-rc'
+  shortVersion: '$(majorVersion).$(minorVersion)$(patchSuffix)'
   patchVersion: $[counter(variables['shortVersion'], 1)]
-  AssemblyVersion: $(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)
+  AssemblyVersion: $(shortVersion).$(Build.BuildId)
   ${{ if eq(parameters.verbosity, 'Quiet') }}:
     dotnetVerbosity: q # Quiet
   ${{ elseif eq(parameters.verbosity, 'Detailed') }}:
