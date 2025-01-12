@@ -26,7 +26,7 @@ variables:
   testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
-  versionPrefix: '-rc'
+  versionPrefix: 'rc'
   shortVersion: '$(majorVersion).$(minorVersion)'
   patchVersion: $[counter(variables['shortVersion'], 1)]
   AssemblyVersion: $(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)
