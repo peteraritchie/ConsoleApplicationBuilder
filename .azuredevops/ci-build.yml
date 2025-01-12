@@ -1,0 +1,72 @@
+parameters:
+- name: verbosity
+  displayName: 'verbosity of this run'
+  type: string
+  default: Minimal
+  values:
+  - Detailed
+  - Quiet
+  - Diagnostic
+  - Minimal
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  dotNetVersion: '8.0'
+  buildConfiguration: 'Release'
+  majorVersion: '0'
+  minorVersion: '1'
+  shortVersion: '$(majorVersion).$(minorVersion)'
+  patchVersion: $[counter(variables['shortVersion'], 1)]
+  AssemblyVersion: $(majorVersion).$(minorVersion).$(patchVersion).$(Build.BuildId)
+  ${{ if eq(parameters.verbosity, 'Quiet') }}:
+    dotnetVerbosity: q # Quiet
+  ${{ elseif eq(parameters.verbosity, 'Detailed') }}:
+    dotnetVerbosity: d # Detailed
+  ${{ elseif eq(parameters.verbosity, 'Diagnostic') }}:
+    dotnetVerbosity: diag # Diagnostic
+  ${{ else }}:
+    dotnetVerbosity: m # Minimal
+
+steps:
+  - task: UseDotNet@2
+    displayName: 'Use .NET SDK $(dotNetVersion)'
+    inputs:
+      packageType: sdk
+      version: $(dotNetVersion)
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore project dependencies'
+    inputs:
+      command: 'restore'
+      projects: 'src/**/*.csproj'
+      verbosityRestore: '${{ parameter.verbosity }}'
+
+  - task: DotNetCoreCLI@2
+    # run tests and publish results/coverage to Azure DevOps
+    displayName: 'Dotnet Test - $(buildConfiguration)'
+    inputs:
+    command: 'test'
+    arguments: >-
+        -c $(buildConfiguration)
+        --nologo
+        --collect "Code coverage"
+        -v $(dotnetVerbosity)
+        /p:Version=$(assemblyVersion)
+        /clp:ErrorsOnly
+    workingDirectory: $(Build.SourcesDirectory)/$(solutionDirectory)
+    testRunTitle: 'Dotnet Test - $(buildConfiguration)'
+
+  - task: PublishPipelineArtifact@1
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)'
+      publishLocation: 'pipeline'

@@ -4,10 +4,37 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Console Application Builder</Title>
+    <Authors>Peter Ritchie</Authors>
+    <Product>Console Application Builder</Product>
+    <Description>An application-builder pattern implementation for .NET console applications. ConsoleApplicationBuilder supports dependency injection (including third-party containers), logging, and configuration (json file, environment names, command-line arguments, environment variables).</Description>
+    <Copyright>©️ 2025 Peter Ritchie</Copyright>
+    <PackageProjectUrl>https://github.com/peteraritchie/ConsoleApplicationBuilder</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/peteraritchie/ConsoleApplicationBuilder</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>dotnet .net console application-builder dependency-injection</PackageTags>
+    <IncludeSymbols>True</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
