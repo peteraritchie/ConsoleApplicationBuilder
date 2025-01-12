@@ -21,7 +21,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  dotNetVersion: 8.0
+  dotNetVersion: '8.x'
   buildConfiguration: 'Release'
   majorVersion: '0'
   minorVersion: '1'
@@ -38,8 +38,6 @@ variables:
     dotnetVerbosity: m # Minimal
 
 steps:
-  - script: echo $(dotNetVersion);
-
   - task: UseDotNet@2
     displayName: 'Use .NET SDK $(dotNetVersion)'
     inputs:
