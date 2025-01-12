@@ -21,10 +21,10 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  solutionDirectory: '.'
+  solutionDirectory: 'src'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
-  testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
+  testProjects: 'Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
   shortVersion: '$(majorVersion).$(minorVersion)'
@@ -62,7 +62,7 @@ steps:
       arguments: >-
           -c $(buildConfiguration)
           --nologo
-          --collect 'Code coverage'
+          --collect "'Code coverage'"
           -v $(dotnetVerbosity)
           /p:Version=$(assemblyVersion)
           /clp:ErrorsOnly
