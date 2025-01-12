@@ -61,7 +61,7 @@ steps:
       arguments: >-
           -c $(buildConfiguration)
           --nologo
-          --collect "'Code coverage'"
+          --collect 'Code coverage'
           -v $(dotnetVerbosity)
           /p:Version=$(assemblyVersion)
           /clp:ErrorsOnly
