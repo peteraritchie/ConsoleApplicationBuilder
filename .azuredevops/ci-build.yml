@@ -21,7 +21,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  dotNetVersion: '8.0'
+  dotNetVersion: 8.0
   buildConfiguration: 'Release'
   majorVersion: '0'
   minorVersion: '1'
