@@ -104,4 +104,4 @@ steps:
     inputs:
       command: push
       nuGetFeedType: external
-      publishFeedCredentials: 'TestNuGet - PRI-ConsoleApplicationBuilder'
+      publishFeedCredentials: 'Nuget - PRI.ConsoleApplicationBuilder'
