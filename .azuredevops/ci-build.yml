@@ -29,7 +29,7 @@ variables:
   shortVersion: '$(majorVersion).$(minorVersion)'
   patchVersion: $[counter(variables['shortVersion'], 1)]
   versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
-  versionSuffixType: 'rc'
+  versionSuffixType: 'rc.'
   buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
   buildVersion: $[counter(variables['buildVersionKey'], 1)]
   versionSuffix: '$(versionSuffixType)$(buildVersion)'
