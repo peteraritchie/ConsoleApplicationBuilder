@@ -24,7 +24,7 @@ trigger:
       - main
   paths:
     include:
-      - src
+      - src/ConsoleApplicationBuilder
 
 pool:
   vmImage: ubuntu-latest
@@ -32,7 +32,7 @@ pool:
 variables:
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
-  testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
+  testProjects: 'src/ConsoleApplicationBuilder/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
   shortVersion: '$(majorVersion).$(minorVersion)'
@@ -65,7 +65,7 @@ steps:
     displayName: 'Restore project dependencies'
     inputs:
       command: 'restore'
-      projects: 'src/**/*.csproj'
+      projects: 'src/ConsoleApplicationBuilder/**/*.csproj'
       verbosityRestore: '${{ parameters.verbosity }}'
 
   - task: DotNetCoreCLI@2
@@ -90,7 +90,7 @@ steps:
   - task: CopyFiles@2
     displayName: 'Copy package to artifact staging directory'
     inputs:
-      SourceFolder: 'src'
+      SourceFolder: 'src/ConsoleApplicationBuilder'
       Contents: '**/*.nupkg'
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
