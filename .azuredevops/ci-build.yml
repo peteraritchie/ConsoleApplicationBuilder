@@ -29,11 +29,14 @@ variables:
   shortVersion: '$(majorVersion).$(minorVersion)'
   patchVersion: $[counter(variables['shortVersion'], 1)]
   versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
-  versionSuffixType: 'rc.'
   buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
   buildVersion: $[counter(variables['buildVersionKey'], 1)]
+  versionSuffixType: 'rc.'
+${{ if not(eq(variables['versionSuffixType'], '') }}:
   versionSuffix: '$(versionSuffixType)$(buildVersion)'
-  assemblyVersion: '$(majorVersion).$(minorVersion).$(patchVersion)$(buildVersion)'
+${{ else }}:
+  versionSuffix: ''
+  assemblyVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(buildVersion)'
   ${{ if eq(parameters.verbosity, 'Quiet') }}:
     dotnetVerbosity: q # Quiet
   ${{ elseif eq(parameters.verbosity, 'Detailed') }}:
