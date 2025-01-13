@@ -32,7 +32,7 @@ variables:
   buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
   buildVersion: $[counter(variables['buildVersionKey'], 1)]
   versionSuffixType: 'rc.'
-${{ if not(eq(variables['versionSuffixType'], '') }}:
+${{ if not( eq(variables['versionSuffixType'], '') ) }}:
   versionSuffix: '$(versionSuffixType)$(buildVersion)'
 ${{ else }}:
   versionSuffix: ''
