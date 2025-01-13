@@ -16,7 +16,7 @@ parameters:
   - rc.
   - beta.
   - alpha.
-  - ''
+  - none
 
 trigger:
   branches:
@@ -40,7 +40,7 @@ variables:
   versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
   buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
   buildVersion: $[counter(variables['buildVersionKey'], 1)]
-${{ if not( eq(parameters['versionSuffixType'], '') ) }}:
+${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
   versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
 ${{ else }}:
   versionSuffix: ''
