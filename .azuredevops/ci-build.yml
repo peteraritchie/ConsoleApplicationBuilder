@@ -82,6 +82,7 @@ steps:
           /p:VersionPrefix=$(versionPrefix)
           /p:AssemblyVersion=$(assemblyVersion)
           /p:IncludeSymbols=true
+          /p:SymbolPackageFormat=snupkg
           /clp:ErrorsOnly
           --collect "Code coverage"
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
