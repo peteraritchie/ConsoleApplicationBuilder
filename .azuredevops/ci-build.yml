@@ -33,6 +33,7 @@ variables:
   buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
   buildVersion: $[counter(variables['buildVersionKey'], 1)]
   versionSuffix: '$(versionSuffixType)$(buildVersion)'
+  assemblyVersion: '$(majorVersion).$(minorVersion).$(patchVersion)$(buildVersion)'
   ${{ if eq(parameters.verbosity, 'Quiet') }}:
     dotnetVerbosity: q # Quiet
   ${{ elseif eq(parameters.verbosity, 'Detailed') }}:
@@ -68,6 +69,8 @@ steps:
           -v $(dotnetVerbosity)
           /p:VersionSuffx=$(versionSuffix)
           /p:VersionPrefix=$(versionPrefix)
+          /p:AssemblyVersion=$(assemblyVersion)
+          /p:IncludeSymbols=true
           /clp:ErrorsOnly
           --collect "Code coverage"
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
