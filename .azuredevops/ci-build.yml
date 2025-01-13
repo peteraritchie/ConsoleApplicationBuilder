@@ -8,6 +8,15 @@ parameters:
   - Quiet
   - Diagnostic
   - Minimal
+- name: versionSuffixType
+  displayName: Nuget Version Suffix Type
+  type: string
+  default: rc.
+  values:
+  - rc.
+  - beta.
+  - alpha.
+  - ''
 
 trigger:
   branches:
@@ -31,9 +40,8 @@ variables:
   versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
   buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
   buildVersion: $[counter(variables['buildVersionKey'], 1)]
-  versionSuffixType: 'rc.'
-${{ if not( eq(variables['versionSuffixType'], '') ) }}:
-  versionSuffix: '$(versionSuffixType)$(buildVersion)'
+${{ if not( eq(parameters['versionSuffixType'], '') ) }}:
+  versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
 ${{ else }}:
   versionSuffix: ''
   assemblyVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(buildVersion)'
