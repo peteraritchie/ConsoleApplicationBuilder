@@ -25,7 +25,7 @@ trigger:
   paths:
     include:
       - src/dotnet-new-template
-      - .azuredevops
+      - .azuredevops/cd-template.yml
 
 pool:
   vmImage: ubuntu-latest
@@ -69,7 +69,7 @@ steps:
       configuration: '$(buildConfiguration)'
       verbosityPack: '${{ parameters.verbosity }}'
       packagesToPack: '$(sourceDir)/Pri.ConsoleApplicationBuilder.Templates.csproj'
-      buildProperties: 'Version=$(versionPredfix);VersionSuffix=$(versionSuffix)'
+      buildProperties: 'Version=$(versionPrefix);VersionSuffix=$(versionSuffix)'
 
   - task: PublishPipelineArtifact@1
     inputs:

@@ -25,7 +25,7 @@ trigger:
   paths:
     include:
       - src/ConsoleApplicationBuilder
-      - .azuredevops
+      - .azuredevops/ci-build.yml
 
 pool:
   vmImage: ubuntu-latest
