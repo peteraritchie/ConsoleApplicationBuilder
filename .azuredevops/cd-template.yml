@@ -46,7 +46,7 @@ variables:
     versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
   ${{ else }}:
     versionSuffix: ''
-  nugetVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(versionSuffix)'
+  # nugetVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(versionSuffix)'
 
 steps:
   - task: UseDotNet@2
@@ -69,7 +69,7 @@ steps:
       configuration: '$(buildConfiguration)'
       verbosityPack: '${{ parameters.verbosity }}'
       packagesToPack: '$(sourceDir)/Pri.ConsoleApplicationBuilder.Templates.csproj'
-      buildProperties: 'Version=$(nugetVersion)'
+      # buildProperties: 'Version=$(nugetVersion)'
 
   - task: PublishPipelineArtifact@1
     inputs:
