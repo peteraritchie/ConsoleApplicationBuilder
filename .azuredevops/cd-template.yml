@@ -69,7 +69,7 @@ steps:
       configuration: '$(buildConfiguration)'
       verbosityPack: '${{ parameters.verbosity }}'
       packagesToPack: '$(sourceDir)/Pri.ConsoleApplicationBuilder.Templates.csproj'
-      buildProperties: 'Version=$(assemblyVersion)'
+      buildProperties: 'Version=$(versionPredfix);VersionSuffix=$(versionSuffix)'
 
   - task: PublishPipelineArtifact@1
     inputs:
