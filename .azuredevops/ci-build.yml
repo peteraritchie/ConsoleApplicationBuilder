@@ -32,6 +32,7 @@ pool:
 variables:
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
+  nugetServiceConnection: 'TestNuGet - PRI-ConsoleApplicationBuilder'
   testProjects: 'src/ConsoleApplicationBuilder/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
@@ -75,24 +76,35 @@ steps:
       command: 'test'
       projects: $(testProjects)
       arguments: >-
-          -c $(buildConfiguration)
+          --no-restore
+          --no-build
           --nologo
           -v $(dotnetVerbosity)
-          /p:VersionSuffx=$(versionSuffix)
-          /p:VersionPrefix=$(versionPrefix)
-          /p:AssemblyVersion=$(assemblyVersion)
-          /p:IncludeSymbols=true
-          /p:SymbolPackageFormat=snupkg
           /clp:ErrorsOnly
           --collect "Code coverage"
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
-  - task: CopyFiles@2
-    displayName: 'Copy package to artifact staging directory'
+  - task: DotNetCoreCLI@2
+    displayName: 'pack'
     inputs:
-      SourceFolder: 'src/ConsoleApplicationBuilder'
-      Contents: '**/*.nupkg'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      command: 'pack'
+      verbosityPack: '${{ parameters.verbosity }}'
+      arguments: >-
+          --no-restore
+          --no-build
+          --nologo
+          /p:VersionSuffix=$(versionSuffix)
+          /p:VersionPrefix=$(versionPrefix)
+          /p:AssemblyVersion=$(assemblyVersion)
+          /p:IncludeSymbols=true
+          /p:SymbolPackageFormat=snupkg
+
+  # - task: CopyFiles@2
+  #   displayName: 'Copy package to artifact staging directory'
+  #   inputs:
+  #     SourceFolder: 'src/ConsoleApplicationBuilder'
+  #     Contents: '**/*.nupkg'
+  #     TargetFolder: '$(Build.ArtifactStagingDirectory)'
 
   - task: PublishPipelineArtifact@1
     inputs:
@@ -104,4 +116,4 @@ steps:
     inputs:
       command: push
       nuGetFeedType: external
-      publishFeedCredentials: 'Nuget - PRI.ConsoleApplicationBuilder'
+      publishFeedCredentials: $(nugetServiceConnection)
