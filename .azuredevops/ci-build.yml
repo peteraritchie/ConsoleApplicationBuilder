@@ -25,6 +25,7 @@ trigger:
   paths:
     include:
       - src/ConsoleApplicationBuilder
+      - .azuredevops
 
 pool:
   vmImage: ubuntu-latest
@@ -33,8 +34,8 @@ variables:
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
   nugetServiceConnection: 'TestNuGet - PRI-ConsoleApplicationBuilder'
-  symbolPackageFormat: 'snupkg'
   testProjects: 'src/ConsoleApplicationBuilder/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
+  symbolPackageFormat: 'snupkg'
   majorVersion: '0'
   minorVersion: '1'
   shortVersion: '$(majorVersion).$(minorVersion)'
