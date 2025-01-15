@@ -71,7 +71,7 @@ steps:
 
   - task: DotNetCoreCLI@2
     # run tests and publish results/coverage to Azure DevOps
-    displayName: 'Dotnet Test - $(buildConfiguration)'
+    displayName: 'Dotnet Build/Test - $(buildConfiguration)'
     inputs:
       command: 'test'
       projects: $(testProjects)
@@ -89,6 +89,8 @@ steps:
     inputs:
       command: 'pack'
       verbosityPack: '${{ parameters.verbosity }}'
+      includeSymbols: true
+      SymbolPackageFormat: 'snupkg'
       arguments: >-
           --no-restore
           --no-build
@@ -96,8 +98,6 @@ steps:
           /p:VersionSuffix=$(versionSuffix)
           /p:VersionPrefix=$(versionPrefix)
           /p:AssemblyVersion=$(assemblyVersion)
-          /p:IncludeSymbols=true
-          /p:SymbolPackageFormat=snupkg
 
   # - task: CopyFiles@2
   # - task: CopyFiles@2
