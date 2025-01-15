@@ -90,11 +90,11 @@ steps:
       command: 'pack'
       verbosityPack: '${{ parameters.verbosity }}'
       includeSymbols: true
-      SymbolPackageFormat: 'snupkg'
       arguments: >-
           --no-restore
           --no-build
           --nologo
+          /p:SymbolPackageFormat=snupkg
           /p:VersionSuffix=$(versionSuffix)
           /p:VersionPrefix=$(versionPrefix)
           /p:AssemblyVersion=$(assemblyVersion)
