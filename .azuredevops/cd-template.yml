@@ -46,6 +46,7 @@ variables:
     versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
   ${{ else }}:
     versionSuffix: ''
+  assemblyVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(buildVersion)'
 
 steps:
   - task: UseDotNet@2
