@@ -33,6 +33,7 @@ variables:
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
   nugetServiceConnection: 'TestNuGet - PRI-ConsoleApplicationBuilder'
+  symbolPackageFormat: 'snupkg'
   testProjects: 'src/ConsoleApplicationBuilder/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   majorVersion: '0'
   minorVersion: '1'
