@@ -89,15 +89,10 @@ steps:
     inputs:
       command: 'pack'
       verbosityPack: '${{ parameters.verbosity }}'
-      arguments: >-
-          --no-restore
-          --no-build
-          --nologo
-          /p:SymbolPackageFormat=snupkg
-          /p:VersionSuffix=$(versionSuffix)
-          /p:VersionPrefix=$(versionPrefix)
-          /p:AssemblyVersion=$(assemblyVersion)
+      packagesToPack: 'src/ConsoleApplicationBuilder/ConsoleApplicationBuilder/Pri.ConsoleApplicationBuilder.csproj'
+      nobuild: true
       includeSymbols: true
+      includesource: true
 
   # - task: CopyFiles@2
   # - task: CopyFiles@2
