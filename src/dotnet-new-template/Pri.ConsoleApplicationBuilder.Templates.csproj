@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- Follow the instructions on https://learn.microsoft.com/en-us/nuget/create-packages/package-authoring-best-practices -->
-    <PackageId>Pri.ConsoleApplicationBuilder.Templates</PackageId>
+    <PackageId>PRI.ConsoleApplicationBuilder.Templates</PackageId>
     <PackageVersion>1.0</PackageVersion>
     <Title>Console application template based on ConsoleApplicationBuilder.</Title>
     <Authors>Peter Ritchie</Authors>

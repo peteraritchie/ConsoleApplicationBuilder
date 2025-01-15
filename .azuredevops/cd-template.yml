@@ -35,6 +35,17 @@ variables:
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
   nugetServiceConnection: 'TestNuGet - PRI-ConsoleApplicationBuilder'
+  majorVersion: '0'
+  minorVersion: '1'
+  shortVersion: '$(majorVersion).$(minorVersion)'
+  patchVersion: $[counter(variables['shortVersion'], 1)]
+  versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
+  buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
+  buildVersion: $[counter(variables['buildVersionKey'], 1)]
+  ${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
+    versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
+  ${{ else }}:
+    versionSuffix: ''
 
 steps:
   - task: UseDotNet@2
@@ -62,3 +73,9 @@ steps:
       targetPath: '$(Build.ArtifactStagingDirectory)'
       publishLocation: 'pipeline'
 
+  - task: NuGetCommand@2
+    displayName: 'NuGet Push'
+    inputs:
+      command: push
+      nuGetFeedType: external
+      publishFeedCredentials: $(nugetServiceConnection)
