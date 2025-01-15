@@ -36,7 +36,7 @@ variables:
   buildConfiguration: 'Release'
   nugetServiceConnection: 'TestNuGet - PRI-ConsoleApplicationBuilder'
 
-  steps:
+steps:
   - task: UseDotNet@2
     displayName: 'Use .NET SDK $(dotNetVersion)'
     inputs:
