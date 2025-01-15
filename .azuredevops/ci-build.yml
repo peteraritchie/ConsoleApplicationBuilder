@@ -85,11 +85,10 @@ steps:
       testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
   - task: DotNetCoreCLI@2
-    displayName: 'pack'
+    displayName: 'Pack'
     inputs:
       command: 'pack'
       verbosityPack: '${{ parameters.verbosity }}'
-      includeSymbols: true
       arguments: >-
           --no-restore
           --no-build
@@ -98,6 +97,7 @@ steps:
           /p:VersionSuffix=$(versionSuffix)
           /p:VersionPrefix=$(versionPrefix)
           /p:AssemblyVersion=$(assemblyVersion)
+      includeSymbols: true
 
   # - task: CopyFiles@2
   # - task: CopyFiles@2
