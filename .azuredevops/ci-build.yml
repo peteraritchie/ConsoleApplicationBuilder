@@ -58,9 +58,11 @@ variables:
     dotnetVerbosity: m # Minimal
 
 stages:
-- stage: 'Build and Test'
+- stage: build_test
+  displayName: 'Build and Test'
   jobs:
   - job: 'Build'
+    displayName: 'Build'
     steps:
       - task: UseDotNet@2
         displayName: 'Use .NET SDK $(dotNetVersion)'
