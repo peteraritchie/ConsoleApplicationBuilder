@@ -57,61 +57,57 @@ variables:
   ${{ else }}:
     dotnetVerbosity: m # Minimal
 
-steps:
-  - task: UseDotNet@2
-    displayName: 'Use .NET SDK $(dotNetVersion)'
-    inputs:
-      packageType: sdk
-      version: $(dotNetVersion)
+stages:
+- stage: 'Build and Test'
+  jobs:
+  - job: 'Build'
+    steps:
+      - task: UseDotNet@2
+        displayName: 'Use .NET SDK $(dotNetVersion)'
+        inputs:
+          packageType: sdk
+          version: $(dotNetVersion)
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore project dependencies'
-    inputs:
-      command: 'restore'
-      projects: 'src/ConsoleApplicationBuilder/**/*.csproj'
-      verbosityRestore: '${{ parameters.verbosity }}'
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore project dependencies'
+        inputs:
+          command: 'restore'
+          projects: 'src/ConsoleApplicationBuilder/**/*.csproj'
+          verbosityRestore: '${{ parameters.verbosity }}'
 
-  - task: DotNetCoreCLI@2
-    # run tests and publish results/coverage to Azure DevOps
-    displayName: 'Dotnet Build/Test - $(buildConfiguration)'
-    inputs:
-      command: 'test'
-      projects: $(testProjects)
-      arguments: >-
-          --no-restore
-          -c $(buildConfiguration)
-          --nologo
-          -v $(dotnetVerbosity)
-          /clp:ErrorsOnly
-          --collect "Code coverage"
-      testRunTitle: 'Dotnet Test - $(buildConfiguration)'
+      - task: DotNetCoreCLI@2
+        # run tests and publish results/coverage to Azure DevOps
+        displayName: 'Dotnet Build/Test - $(buildConfiguration)'
+        inputs:
+          command: 'test'
+          projects: $(testProjects)
+          arguments: >-
+              --no-restore
+              -c $(buildConfiguration)
+              --nologo
+              -v $(dotnetVerbosity)
+              /clp:ErrorsOnly
+              --collect "Code coverage"
+          testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Pack'
-    inputs:
-      command: 'pack'
-      verbosityPack: '${{ parameters.verbosity }}'
-      packagesToPack: 'src/ConsoleApplicationBuilder/ConsoleApplicationBuilder/Pri.ConsoleApplicationBuilder.csproj'
-      nobuild: true
-      includeSymbols: true
-      includesource: true
+      - task: DotNetCoreCLI@2
+        displayName: 'Pack'
+        inputs:
+          command: 'pack'
+          verbosityPack: '${{ parameters.verbosity }}'
+          packagesToPack: 'src/ConsoleApplicationBuilder/ConsoleApplicationBuilder/Pri.ConsoleApplicationBuilder.csproj'
+          nobuild: true
+          includeSymbols: true
+          includesource: true
 
-  # - task: CopyFiles@2
-  # - task: CopyFiles@2
-  #   displayName: 'Copy package to artifact staging directory'
-  #   inputs:
-  #     SourceFolder: 'src/ConsoleApplicationBuilder'
-  #     Contents: '**/*.nupkg'
-  #     TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          publishLocation: 'pipeline'
 
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)'
-      publishLocation: 'pipeline'
-
-  - task: NuGetCommand@2
-    displayName: 'NuGet Push'
-    inputs:
-      command: push
-      nuGetFeedType: external
-      publishFeedCredentials: $(nugetServiceConnection)
+      - task: NuGetCommand@2
+        displayName: 'NuGet Push'
+        inputs:
+          command: push
+          nuGetFeedType: external
+          publishFeedCredentials: $(nugetServiceConnection)
