@@ -114,7 +114,6 @@ stages:
   jobs:
   - job: nuget_push
     displayName: 'NuGet Push'
-    dependsOn: Build
     steps:
       - checkout: none
 
