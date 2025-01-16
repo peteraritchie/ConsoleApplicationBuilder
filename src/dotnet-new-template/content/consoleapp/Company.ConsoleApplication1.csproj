@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pri.ConsoleApplicationBuilder" Version="0.1.45-rc.19" />
+    <PackageReference Include="Pri.ConsoleApplicationBuilder" Version="1.0.0-rc.1" />
   </ItemGroup>
 
   <ItemGroup>

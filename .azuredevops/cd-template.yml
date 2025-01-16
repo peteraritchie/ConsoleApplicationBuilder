@@ -34,14 +34,11 @@ variables:
   sourceDir: 'src/dotnet-new-template'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
-  nugetServiceConnection: 'TestNuGet - PRI-ConsoleApplicationBuilder'
-  majorVersion: '0'
-  minorVersion: '1'
-  shortVersion: '$(majorVersion).$(minorVersion)'
-  patchVersion: $[counter(variables['shortVersion'], 1)]
-  versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
-  buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
-  buildVersion: $[counter(variables['buildVersionKey'], 1)]
+  nugetServiceConnection: 'Nuget - PRI.ConsoleApplicationBuilder' # 'TestNuGet - PRI-ConsoleApplicationBuilder'
+  majorVersion: '1'
+  minorVersion: '0'
+  patchVersion: $[counter(format('{0}-{1}',variables['majorVersion'],variables['minorVersion']), 1)]
+  buildVersion: $[counter(format('{0}-{1}-{2}-{3}',variables['majorVersion'],variables['minorVersion'],variables['patchVersion'],variables['versionSuffixType']), 1)]
   ${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
     versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
   ${{ else }}:
