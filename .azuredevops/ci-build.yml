@@ -61,8 +61,8 @@ stages:
 - stage: build_test
   displayName: 'Build and Test'
   jobs:
-  - job: 'Build'
-    displayName: 'Build'
+  - job: Build
+    displayName: 'Build and Test'
     steps:
       - task: UseDotNet@2
         displayName: 'Use .NET SDK $(dotNetVersion)'
@@ -108,9 +108,13 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           publishLocation: 'pipeline'
 
-  - job: 'nuget_push'
+- stage: nuget_publish
+  displayName: 'NuGet Publish'
+  dependsOn: build_test
+  jobs:
+  - job: nuget_push
     displayName: 'NuGet Push'
-    dependsOn: 'Build'
+    dependsOn: Build
     steps:
       - checkout: none
 
