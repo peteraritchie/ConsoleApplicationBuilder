@@ -120,6 +120,7 @@ stages:
       - task: DownloadPipelineArtifact@2
         inputs:
           artifact: 'NuGet'
+          targetPath: '$(Build.ArtifactStagingDirectory)'
 
       - task: NuGetCommand@2
         displayName: 'NuGet Push'
