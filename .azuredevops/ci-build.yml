@@ -108,7 +108,7 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           publishLocation: 'pipeline'
 
-  - job: 'nuget-push'
+  - job: 'nuget_push'
     displayName: 'NuGet Push'
     steps:
       - task: DownloadPipelineArtifact@2
