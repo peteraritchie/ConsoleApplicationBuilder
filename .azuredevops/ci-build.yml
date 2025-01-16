@@ -40,8 +40,7 @@ variables:
   minorVersion: '0'
   patchVersion: $[counter(format('{0}.{1}',variables['majorVersion'],variables['minorVersion']), 1)]
   versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
-  buildVersionKey: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffixType)'
-  buildVersion: $[counter(variables['buildVersionKey'], 1)]
+  buildVersion: $[counter(format('{0}.{1}.{2}{3}',variables['majorVersion'],variables['minorVersion'],variables['patchVersion'],variables['versionSuffixType']), 1)]
   ${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
     versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
   ${{ else }}:
