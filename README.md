@@ -2,6 +2,13 @@
 
 ![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/Pri/ConsoleApplicationBuilder/18)
 ![Azure DevOps builds](https://img.shields.io/azure-devops/build/Pri/ConsoleApplicationBuilder/18)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed/peteraritchie/ConsoleApplicationBuilder)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/peteraritchie/ConsoleApplicationBuilder)
+
+
+Class library | `dotnet new` project template 
+:-: | :-:
+![NuGet Version](https://img.shields.io/nuget/vpre/PRI.ConsoleApplicationBuilder) | ![NuGet Version](https://img.shields.io/nuget/vpre/PRI.ConsoleApplicationBuilder.Temlates)
 
 .NET has had a Dependency Injection (DI) feature for a while now. Out-of-the-box generated ASP.NET applications and console worker project templates create startup code that creates a service collection and service provider (Dependency Injection Container), developers just need to add their services to the service collection and perform any configuration required.
 
