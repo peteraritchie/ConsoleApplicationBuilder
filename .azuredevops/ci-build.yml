@@ -110,6 +110,7 @@ stages:
 
   - job: 'nuget_push'
     displayName: 'NuGet Push'
+    dependsOn: 'build_test'
     steps:
       - task: DownloadPipelineArtifact@2
         inputs:
