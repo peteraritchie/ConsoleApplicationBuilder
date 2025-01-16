@@ -48,37 +48,58 @@ variables:
     versionSuffix: ''
   packageVersion: '$(majorVersion).$(minorVersion).$(patchVersion)-$(versionSuffix)'
 
-steps:
-  - task: UseDotNet@2
-    displayName: 'Use .NET SDK $(dotNetVersion)'
-    inputs:
-      packageType: sdk
-      version: $(dotNetVersion)
+stages:
+- stage: build_test
+  displayName: 'Build and Test'
+  jobs:
+  - job: Build
+    displayName: 'Build and Test'
+    steps:
+      - task: UseDotNet@2
+        displayName: 'Use .NET SDK $(dotNetVersion)'
+        inputs:
+          packageType: sdk
+          version: $(dotNetVersion)
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore project dependencies'
-    inputs:
-      command: 'restore'
-      projects: '$(sourceDir)/**/*.csproj'
-      verbosityRestore: '${{ parameters.verbosity }}'
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore project dependencies'
+        inputs:
+          command: 'restore'
+          projects: '$(sourceDir)/**/*.csproj'
+          verbosityRestore: '${{ parameters.verbosity }}'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Pack'
-    inputs:
-      command: 'pack'
-      configuration: '$(buildConfiguration)'
-      verbosityPack: '${{ parameters.verbosity }}'
-      packagesToPack: '$(sourceDir)/Pri.ConsoleApplicationBuilder.Templates.csproj'
-      buildProperties: 'Version=$(packageVersion)'
+      - task: DotNetCoreCLI@2
+        displayName: 'Pack'
+        inputs:
+          command: 'pack'
+          configuration: '$(buildConfiguration)'
+          verbosityPack: '${{ parameters.verbosity }}'
+          packagesToPack: '$(sourceDir)/Pri.ConsoleApplicationBuilder.Templates.csproj'
+          buildProperties: 'Version=$(packageVersion)'
 
-  - task: PublishPipelineArtifact@1
-    inputs:
-      targetPath: '$(Build.ArtifactStagingDirectory)'
-      publishLocation: 'pipeline'
+      - task: PublishPipelineArtifact@1
+        inputs:
+          artifactName: 'NuGet'
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+          publishLocation: 'pipeline'
 
-  - task: NuGetCommand@2
+- stage: nuget_publish
+  displayName: 'NuGet Publish'
+  dependsOn: build_test
+  jobs:
+  - job: nuget_push
     displayName: 'NuGet Push'
-    inputs:
-      command: push
-      nuGetFeedType: external
-      publishFeedCredentials: $(nugetServiceConnection)
+    steps:
+      - checkout: none
+
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          artifact: 'NuGet'
+          targetPath: '$(Build.ArtifactStagingDirectory)'
+
+      - task: NuGetCommand@2
+        displayName: 'NuGet Push'
+        inputs:
+          command: push
+          nuGetFeedType: external
+          publishFeedCredentials: $(nugetServiceConnection)
