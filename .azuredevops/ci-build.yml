@@ -33,11 +33,11 @@ pool:
 variables:
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
-  nugetServiceConnection: 'TestNuGet - PRI-ConsoleApplicationBuilder'
+  nugetServiceConnection: 'Nuget - PRI.ConsoleApplicationBuilder' # 'TestNuGet - PRI-ConsoleApplicationBuilder'
   testProjects: 'src/ConsoleApplicationBuilder/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   symbolPackageFormat: 'snupkg'
-  majorVersion: '0'
-  minorVersion: '1'
+  majorVersion: '1'
+  minorVersion: '0'
   shortVersion: '$(majorVersion).$(minorVersion)'
   patchVersion: $[counter(variables['shortVersion'], 1)]
   versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
