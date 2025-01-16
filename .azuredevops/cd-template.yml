@@ -49,11 +49,11 @@ variables:
   packageVersion: '$(majorVersion).$(minorVersion).$(patchVersion)-$(versionSuffix)'
 
 stages:
-- stage: build_test
-  displayName: 'Build and Test'
+- stage: build
+  displayName: 'Build'
   jobs:
   - job: Build
-    displayName: 'Build and Test'
+    displayName: 'Build'
     steps:
       - task: UseDotNet@2
         displayName: 'Use .NET SDK $(dotNetVersion)'
@@ -85,7 +85,7 @@ stages:
 
 - stage: nuget_publish
   displayName: 'NuGet Publish'
-  dependsOn: build_test
+  dependsOn: build
   jobs:
   - job: nuget_push
     displayName: 'NuGet Push'
