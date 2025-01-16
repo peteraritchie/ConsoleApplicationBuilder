@@ -112,6 +112,8 @@ stages:
     displayName: 'NuGet Push'
     dependsOn: 'Build'
     steps:
+      - checkout: none
+
       - task: DownloadPipelineArtifact@2
         inputs:
           artifact: 'NuGet'
