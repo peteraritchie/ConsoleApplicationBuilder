@@ -5,18 +5,17 @@
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-closed/peteraritchie/ConsoleApplicationBuilder)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues-pr/peteraritchie/ConsoleApplicationBuilder)
 
-
 Class library | `dotnet new` project template 
 :-: | :-:
-![NuGet Version](https://img.shields.io/nuget/vpre/PRI.ConsoleApplicationBuilder) | ![NuGet Version](https://img.shields.io/nuget/vpre/PRI.ConsoleApplicationBuilder.Temlates)
+![NuGet Version](https://img.shields.io/nuget/v/PRI.ConsoleApplicationBuilder) | ![NuGet Version](https://img.shields.io/nuget/v/PRI.ConsoleApplicationBuilder.Templates)
 
-.NET has had a Dependency Injection (DI) feature for a while now. Out-of-the-box generated ASP.NET applications and console worker project templates create startup code that creates a service collection and service provider (Dependency Injection Container), developers just need to add their services to the service collection and perform any configuration required.
+.NET has had a Dependency Injection (DI) feature for a while. Out-of-the-box generated ASP.NET applications and [console worker project][worker-template] templates create startup code that creates a service collection and service provider (Dependency Injection Container). Developers add their services to the service collection and perform any configuration required.
 
 Except for simple console applications.
 
-Sometimes you just want to create the simplest of applications to do something very specific. A console application is good for that, but it doesn't have DI out of the box. The Console Worker template uses the .NET Generic Host, which does have DI out of the box. But the Console Worker template implements background worker functionality, which is bit heavy if you're just trying to do something simple, but with DI support.
+Sometimes, you just want to create the simplest application to do something very specific. A console application is good for that but doesn't have DI and configuration out of the box. The Console Worker template uses the .NET Generic Host, which does have DI and configuration out of the box. But the Console Worker template implements background worker functionality, which is a bit heavy if you're just trying to do something simple, but with DI support.
 
-This is where ConsoleApplicationBuilder comes into play.
+This is where `ConsoleApplicationBuilder` comes into play.
 
 `ConsoleApplicationBuilder` provides similar functionality to `WebApplicationBuilder` and `HostApplicationBuilder` by providing the following features:
 - Dependency Injection via `IServiceCollection` and `ServiceProvider`.
@@ -28,10 +27,10 @@ This is where ConsoleApplicationBuilder comes into play.
   - Configuration provider precedence
 - Logging
 
-This enables the following .NET features:
+`ConsoleApplicationBuilder` additionally enables the following .NET features:
   - `IOptions<T>`
 
-An accompanying dotnet new project template will produce a simple project with using `Program`:
+The accompanying dotnet new project template produces a simple project using `Program` as the type to build and inject with dependencies:
 
 ```csharp
 class Program(ILogger<Program> logger)
@@ -50,7 +49,7 @@ class Program(ILogger<Program> logger)
 }
 ```
 
-The above code re-uses `Program` as the class to instantiate by the service provider and inject with required services. In particular, the `Program` constructor requires an `ILogger<Program>` instance that will be instantiated and injected in the call the `ConsoleApplicationBuilder.Build<T>()`.
+The above code re-uses `Program` as the class to be instantiated by the service provider and inject with required services. Out of the box, the `Program` constructor requires an `ILogger<Program>` instance that will be instantiated and injected in the call the `ConsoleApplicationBuilder.Build<T>()`.
 
 Using ``ConsoleApplicationBuilder`` can be as minimal as:
 
@@ -77,7 +76,7 @@ A dotnet new project template accompanies `ConsoleApplicationBuilder` to quickly
 To install the dotnet new project template:
 
 ```powershell
-TODO:
+dotnet new install PRI.ConsoleApplicationBuilder.Templates
 ```
 
 The project template supports many of the established dotnet new console options such as `--TargetFrameworkOverride`, `--Framework`, `--langVersion`, `--skipRestore`, and `--NativeAot`. Top-level statements are not supported because `Program` is used as the default type to instantiate and inject services, requiring an instance constructor. i.e., it acts like `dotnet new console` with the `--use-program-main` argument. 
@@ -88,7 +87,7 @@ To create a console project that supports configuration and dependency injection
 dotnet new consoleapp -o Peter.ConsoleApplication
 ```
 
-To create a console project that supports configuration and dependency injection using C# 9 (and thus not using file-scoped namespaces and ):
+To create a console project that supports configuration and dependency injection using C# 9 (and thus not using file-scoped namespaces and primary constructors):
 
 ```powershell
 dotnet new consoleapp -o Peter.ConsoleApplication --langVersion 9
@@ -96,7 +95,7 @@ dotnet new consoleapp -o Peter.ConsoleApplication --langVersion 9
 
 ## Injecting Dependencies
 
-Injecting dependencies with ConsoleApplicationBuilder follows the same convention as `WebApplicationBuilder` and `HostApplicationBuilder`: by adding to the builder's `Services` collection. For example, we can use the built-in `AddHttpClient<T>` extension (provided in Microsoft.Extensions.Http) to add and configure an `HttpClient` singleton and inject it into our `Program` instance as follows:
+Injecting dependencies with `ConsoleApplicationBuilder` follows the same convention as `WebApplicationBuilder` and `HostApplicationBuilder`: by adding to the builder's `Services` collection. For example, we can use the built-in `AddHttpClient<T>` extension (provided in [Microsoft.Extensions.Http]) to add and configure an `HttpClient` singleton and inject it into our `Program` instance as follows:
 
 ```csharp
 class Program(ILogger<Program> logger, HttpClient httpClient)
@@ -122,7 +121,7 @@ class Program(ILogger<Program> logger, HttpClient httpClient)
 
 ## Configuration
 
-Just like HostApplicationBuilder and WebApplicationBuilder, classes that accept a ConfigurationManager or IConfigurationManager parameter in their construction will be injected with the configuration of the current application. Command-line arguments, appsettings values, and environment variables are accessible via the IConfigurationManager object.  For example, if we added some propertiesto our appesettings:
+Just like `HostApplicationBuilder` and `WebApplicationBuilder`, classes that accept a `ConfigurationManager` or `IConfigurationManager` parameter in their construction will be injected with the configuration of the current application. Command-line arguments, appsettings values, and environment variables are accessible via the `IConfigurationManager` object.  For example, if we added some properties to our appesettings:
 
 ```json
 {
@@ -160,12 +159,40 @@ class Program(ILogger<Program> logger, IConfigurationManager configuration)
 }
 ```
 
+With appsettings, typically the [`IOptions<T>`][ioptions-pattern] pattern is used, which `ConsoleApplicationBuilder` enables:
+
+```csharp
+class Program(ILogger<Program> logger, IOptions<TransientFaultHandlingOptions> options)
+{
+    static void Main(string[] args)
+    {
+        var builder = ConsoleApplication.CreateBuilder(args);
+        builder.Services
+            .AddOptions<TransientFaultHandlingOptions>()
+            .Bind(builder.Configuration.GetSection(nameof(TransientFaultHandlingOptions)));
+        var program = builder.Build<Program>();
+        program.Run();
+    }
+
+    private void Run()
+    {
+        logger.LogInformation("TransientFaultHandlingOptions.Enabled: {Enabled}", options.Value.Enabled);
+        logger.LogInformation("Hello, World!");
+    }
+}
+```
+
+Be sure to add the [Microsoft.Extensions.Options] package to get the `AddOptions` extension method.
+
 ## Support
 
 Issues may be logged on the [GitHub issues page](https://github.com/peteraritchie/ConsoleApplicationBuilder/issues)
+
 ## References
 
-[Default service container replacement](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines#default-service-container-replacement)
+- [Default service container replacement](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection-guidelines#default-service-container-replacement)
+- [Options pattern in .NET][ioptions-pattern]
+- [Worker services in .NET][worker-template]
 
 ## Architecturally-significant Decisions
 - Azure YAML pipeline files will be stored in the root of the repository, in a folder named `.azuredevops\azure-pipelines`.
@@ -190,3 +217,8 @@ dotnet add 'C:\Users\peter\src\products\ConsoleApplicationBuilder\src\Tests' ref
 dotnet add 'C:\Users\peter\src\products\ConsoleApplicationBuilder\src\Tests' package 'xunit'
 dotnet add 'C:\Users\peter\src\products\ConsoleApplicationBuilder\src\Tests' package 'xunit.runner.visualstudio'
 ```
+
+[worker-template]: https://learn.microsoft.com/en-us/dotnet/core/extensions/workers
+[ioptions-pattern]: https://learn.microsoft.com/en-us/dotnet/core/extensions/options
+[Microsoft.Extensions.Http]: https://www.nuget.org/packages/Microsoft.Extensions.Http
+[Microsoft.Extensions.Options]: https://www.nuget.org/packages/Microsoft.Extensions.Options
