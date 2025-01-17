@@ -62,6 +62,9 @@ stages:
     displayName: 'Build and Test'
     steps:
       - script: |
+          echo 'majorVersion: $(majorVersion)'
+          echo 'minorVersion: $(minorVersion)'
+          echo 'patchVersion: $(patchVersion)'
           echo 'buildVersion: $(buildVersion)'
 
       - task: UseDotNet@2
