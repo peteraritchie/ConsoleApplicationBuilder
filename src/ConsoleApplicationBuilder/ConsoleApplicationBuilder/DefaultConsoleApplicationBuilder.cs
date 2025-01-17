@@ -45,15 +45,7 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 
 		if (env.IsDevelopment() && env.ApplicationName is { Length: > 0 })
 		{
-			try
-			{
-				var appAssembly = Assembly.Load(new AssemblyName(env.ApplicationName));
-				Configuration.AddUserSecrets(appAssembly, optional: true, reloadOnChange: reloadOnChange);
-			}
-			catch (FileNotFoundException)
-			{
-				// The assembly cannot be found, so just skip it.;
-			}
+			_ = TrySetUserSecrets(Configuration, env.ApplicationName, reloadOnChange);
 		}
 
 		if (args is { Length: > 0 })
@@ -85,6 +77,22 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 				       ? result
 				       : throw new InvalidOperationException(
 					       $"Failed to convert configuration value at '{configuration.GetSection(reloadConfigOnChangeKey).Path}' to type '{typeof(bool)}'."));
+		}
+
+		[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+		static bool TrySetUserSecrets(IConfigurationBuilder configuration, string envApplicationName, bool reloadOnChange)
+		{
+			try
+			{
+				var appAssembly = Assembly.Load(new AssemblyName(envApplicationName));
+				configuration.AddUserSecrets(appAssembly, optional: true, reloadOnChange: reloadOnChange);
+				return true;
+			}
+			catch (FileNotFoundException)
+			{
+				// The assembly cannot be found, so just skip it.;
+			}
+			return false;
 		}
 	}
 

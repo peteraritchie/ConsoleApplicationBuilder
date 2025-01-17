@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Reflection;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 
 namespace Pri.ConsoleApplicationBuilder.Tests;
@@ -6,10 +8,14 @@ namespace Pri.ConsoleApplicationBuilder.Tests;
 [Collection("Environment")]
 public class ApplicationEnvironmentShould
 {
-	[Fact]
+	[Fact ]
 	public void HaveReflectedApplicationName()
 	{
 		string[] args = [];
+		if (Assembly.GetEntryAssembly()?.GetName().Name == "ReSharperTestRunner")
+		{
+			Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", null);
+		}
 		var builder = ConsoleApplication.CreateBuilder(args);
 		Assert.True(builder.Environment.ApplicationName is "testhost" or "ReSharperTestRunner");
 		Assert.Equal("Production", builder.Environment.EnvironmentName);
