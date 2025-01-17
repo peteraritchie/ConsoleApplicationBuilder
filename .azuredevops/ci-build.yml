@@ -11,7 +11,7 @@ parameters:
 - name: versionSuffixType
   displayName: Nuget Version Suffix Type
   type: string
-  default: rc.
+  default: none
   values:
   - rc.
   - beta.
