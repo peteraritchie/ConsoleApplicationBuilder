@@ -62,7 +62,7 @@ stages:
     displayName: 'Build and Test'
     steps:
       - script: |
-        echo 'buildVersion: $(buildVersion)'
+          echo 'buildVersion: $(buildVersion)'
 
       - task: UseDotNet@2
         displayName: 'Use .NET SDK $(dotNetVersion)'
