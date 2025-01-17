@@ -39,7 +39,7 @@ variables:
   majorVersion: '1'
   minorVersion: '0'
   patchVersion: $[counter(format('{0}-{1}',variables['majorVersion'],variables['minorVersion']), 1)]
-  buildVersion: $[counter(format('{0}-{1}-{2}-{3}',variables['majorVersion'],variables['minorVersion'],variables['patchVersion'],variables['versionSuffixType']), 1)]
+  buildVersion: $[counter(format('{0}-{1}-{2}',variables['majorVersion'],variables['minorVersion'],variables['versionSuffixType']), 1)]
   ${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
     versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
   ${{ else }}:
@@ -66,6 +66,7 @@ stages:
           echo 'minorVersion: $(minorVersion)'
           echo 'patchVersion: $(patchVersion)'
           echo 'buildVersion: $(buildVersion)'
+        displayName: 'Log variable values'
 
       - task: UseDotNet@2
         displayName: 'Use .NET SDK $(dotNetVersion)'
