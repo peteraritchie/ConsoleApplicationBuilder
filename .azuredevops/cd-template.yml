@@ -11,7 +11,7 @@ parameters:
 - name: versionSuffixType
   displayName: Nuget Version Suffix Type
   type: string
-  default: rc.
+  default: none
   values:
   - rc.
   - beta.
@@ -38,12 +38,12 @@ variables:
   majorVersion: '1'
   minorVersion: '0'
   patchVersion: $[counter(format('{0}-{1}',variables['majorVersion'],variables['minorVersion']), 1)]
-  buildVersion: $[counter(format('{0}-{1}-{2}-{3}',variables['majorVersion'],variables['minorVersion'],variables['patchVersion'],variables['versionSuffixType']), 1)]
+  buildVersion: $[counter(format('{0}-{1}-{2}',variables['majorVersion'],variables['minorVersion'],variables['versionSuffixType']), 1)]
   ${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
-    versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
+    versionSuffix: '-${{ parameters.versionSuffixType }}$(buildVersion)'
   ${{ else }}:
     versionSuffix: ''
-  packageVersion: '$(majorVersion).$(minorVersion).$(patchVersion)-$(versionSuffix)'
+  packageVersion: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffix)'
 
 stages:
 - stage: build
