@@ -117,6 +117,7 @@ stages:
 - stage: nuget_publish
   displayName: 'NuGet Publish'
   dependsOn: build_test
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   jobs:
   - job: nuget_push
     displayName: 'NuGet Push'
