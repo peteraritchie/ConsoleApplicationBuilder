@@ -1,0 +1,36 @@
+pr:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  dotNetVersion: '8.x'
+  buildConfiguration: 'Release'
+  testProjects: 'src/ConsoleApplicationBuilder/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
+
+stages:
+- stage: build_test
+  displayName: 'Build and Test'
+  jobs:
+  - job: Build
+    displayName: 'Build and Test'
+    steps:
+      - task: UseDotNet@2
+        displayName: 'Use .NET SDK $(dotNetVersion)'
+        inputs:
+          packageType: sdk
+          version: $(dotNetVersion)
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Dotnet Build/Test - $(buildConfiguration)'
+        inputs:
+          command: 'test'
+          projects: $(testProjects)
+          publishTestResults: true
+          arguments: >-
+              -c $(buildConfiguration)
+              --nologo
+              /clp:ErrorsOnly
+              --collect "Code coverage"
+          testRunTitle: 'Dotnet Test - $(buildConfiguration)'
