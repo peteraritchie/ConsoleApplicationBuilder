@@ -27,6 +27,8 @@ trigger:
       - src/dotnet-new-template
       - .azuredevops/cd-template.yml
 
+pr: none
+
 pool:
   vmImage: ubuntu-latest
 

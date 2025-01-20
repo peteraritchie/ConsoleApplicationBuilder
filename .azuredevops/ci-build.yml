@@ -27,6 +27,8 @@ trigger:
       - src/ConsoleApplicationBuilder
       - .azuredevops/ci-build.yml
 
+pr: none
+
 pool:
   vmImage: ubuntu-latest
 
