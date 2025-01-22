@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Diagnostics.Metrics;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -158,6 +159,15 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 	/// <inheritsdoc />
 	public IHostEnvironment Environment { get; }
 
+	/// <inheritsdoc />
+	public IDictionary<object, object> Properties => new Dictionary<object, object>();
+
+	/// <inheritsdoc />
+	IConfigurationManager IHostApplicationBuilder.Configuration => Configuration;
+
+	/// <inheritsdoc />
+	public IMetricsBuilder Metrics => new SimpleMetricsBuilder(Services);
+
 	private sealed class LoggingBuilder(IServiceCollection services) : ILoggingBuilder
 	{
 		public IServiceCollection Services => services;
@@ -207,5 +217,10 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 		services.MakeReadOnly();
 
 		return serviceProvider.GetRequiredService<T>();
+	}
+
+	private sealed class SimpleMetricsBuilder(IServiceCollection services) : IMetricsBuilder
+	{
+		public IServiceCollection Services { get; } = services;
 	}
 }
