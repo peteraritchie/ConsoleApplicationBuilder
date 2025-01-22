@@ -26,6 +26,7 @@ trigger:
     include:
       - src/dotnet-new-template
       - .azuredevops/cd-template.yml
+      - .azuredevops/templates
 
 pr: none
 

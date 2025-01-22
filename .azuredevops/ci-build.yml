@@ -17,6 +17,7 @@ trigger:
     include:
       - src/ConsoleApplicationBuilder
       - .azuredevops/ci-build.yml
+      - .azuredevops/templates
 
 pr: none
 
