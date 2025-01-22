@@ -82,24 +82,30 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)'
           publishLocation: 'pipeline'
 
+# to create a service connection for NuGet
+#   - see also: https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
+# to create an environment for the service connection
+#   - see also: https://learn.microsoft.com/en-us/azure/deployment-environments/how-to-create-access-environments
 - stage: nuget_publish
   displayName: 'NuGet Publish'
   dependsOn: build
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   jobs:
-  - job: nuget_push
+  - deployment: nuget_push
     displayName: 'NuGet Push'
-    steps:
-      - checkout: none
+    environment: 'NuGet'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: 'NuGet'
+                targetPath: '$(Build.ArtifactStagingDirectory)'
 
-      - task: DownloadPipelineArtifact@2
-        inputs:
-          artifact: 'NuGet'
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-
-      - task: NuGetCommand@2
-        displayName: 'NuGet Push'
-        inputs:
-          command: push
-          nuGetFeedType: external
-          publishFeedCredentials: $(nugetServiceConnection)
+            - task: NuGetCommand@2
+              displayName: 'NuGet Push'
+              inputs:
+                command: push
+                nuGetFeedType: external
+                publishFeedCredentials: $(nugetServiceConnection)
