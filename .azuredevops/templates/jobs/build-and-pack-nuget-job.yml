@@ -1,0 +1,88 @@
+# build and pack nuget
+parameters:
+- name: name
+  type: string
+  default: 'pack'
+- name: displayName
+  type: string
+- name: majorVersion
+  type: number
+  default: 1
+- name: minorVersion
+  type: number
+  default: 0
+- name: versionSuffixType
+  type: string
+  default: 'rc'
+  values:
+  - 'rc'
+  - 'beta'
+  - 'alpha'
+  - 'none'
+- name: projects
+  type: string
+- name: packagesToPack
+  type: string
+- name: artifactName
+  type: string
+  default: 'NuGet'
+- name: dependsOn
+  type: string
+- name: dotNetVersion
+  type: string
+  default: '8.x'
+
+jobs:
+- job: ${{ parameters.name }}
+  dependsOn: ${{ parameters.dependsOn }}
+  variables:
+    # Patch version MUST be reset to 0 when minor version is incremented.
+    # Patch and minor versions MUST be reset to 0 when major version is incremented.
+    patchVersion: $[counter(format('{0}-{1}', ${{ parameters.majorVersion }}, ${{ parameters.minorVersion }}), 0)]
+    buildVersion: $[counter(format('{0}-{1}-{2}', ${{ parameters.majorVersion }}, ${{ parameters.minorVersion }}, '${{ parameters.versionSuffixType }}'), 0)]
+    versionPrefix: '$(majorVersion).$(minorVersion).$(patchVersion)'
+    ${{ if eq('none', parameters.versionSuffixType) }}:
+      versionSuffix: ''
+    ${{ else }}:
+      versionSuffix: $[replace(format('{0}.{1}', '${{ parameters.versionSuffixType }}', variables['buildVersion'] ), '.0', '')]
+
+  steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK 8.0'
+      inputs:
+        packageType: 'sdk'
+        version: ${{ parameters.dotNetVersion }}
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
+      inputs:
+        command: 'restore'
+        projects: ${{ parameters.projects }}
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        command: 'build'
+        projects: ${{ parameters.projects }}
+        arguments: >-
+            --no-restore
+            -c Release
+            --nologo
+            /clp:ErrorsOnly
+            /p:Version=$(versionPrefix).$(buildVersion)
+            /p:VersionSuffix=$(versionSuffix)
+    - task: DotNetCoreCLI@2
+      displayName: 'Pack'
+      inputs:
+        command: 'pack'
+        packagesToPack: ${{ parameters.packagesToPack }}
+        buildProperties: 'VersionPrefix=$(versionPrefix);VersionSuffix=$(versionSuffix)'
+        nobuild: true
+        includeSymbols: true
+        includesource: true
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish NuGet package as artifact'
+      inputs:
+        artifactName: ${{ parameters.artifactName }}
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        publishLocation: 'pipeline'

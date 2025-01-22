@@ -8,15 +8,6 @@ parameters:
   - Quiet
   - Diagnostic
   - Minimal
-- name: versionSuffixType
-  displayName: Nuget Version Suffix Type
-  type: string
-  default: none
-  values:
-  - rc.
-  - beta.
-  - alpha.
-  - none
 
 trigger:
   branches:
@@ -33,20 +24,13 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
+  majorVersion: '1'
+  minorVersion: '1'
+  projects: 'src/ConsoleApplicationBuilder/**/*.csproj'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
   nugetServiceConnection: 'Nuget - PRI.ConsoleApplicationBuilder' # 'TestNuGet - PRI-ConsoleApplicationBuilder'
   testProjects: 'src/ConsoleApplicationBuilder/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
-  symbolPackageFormat: 'snupkg'
-  majorVersion: '1'
-  minorVersion: '0'
-  patchVersion: $[counter(format('{0}-{1}',variables['majorVersion'],variables['minorVersion']), 1)]
-  buildVersion: $[counter(format('{0}-{1}-{2}',variables['majorVersion'],variables['minorVersion'],variables['versionSuffixType']), 1)]
-  ${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
-    versionSuffix: '${{ parameters.versionSuffixType }}$(buildVersion)'
-  ${{ else }}:
-    versionSuffix: ''
-  assemblyVersion: '$(majorVersion).$(minorVersion).$(patchVersion).$(buildVersion)'
   ${{ if eq(parameters.verbosity, 'Quiet') }}:
     dotnetVerbosity: q # Quiet
   ${{ elseif eq(parameters.verbosity, 'Detailed') }}:
@@ -58,18 +42,11 @@ variables:
 
 stages:
 - stage: build_test
-  displayName: 'Build and Test'
+  displayName: 'Build, Test, and Pack'
   jobs:
   - job: Build
     displayName: 'Build and Test'
     steps:
-      - script: |
-          echo 'majorVersion: $(majorVersion)'
-          echo 'minorVersion: $(minorVersion)'
-          echo 'patchVersion: $(patchVersion)'
-          echo 'buildVersion: $(buildVersion)'
-        displayName: 'Log variable values'
-
       - task: UseDotNet@2
         displayName: 'Use .NET SDK $(dotNetVersion)'
         inputs:
@@ -80,7 +57,7 @@ stages:
         displayName: 'Restore project dependencies'
         inputs:
           command: 'restore'
-          projects: 'src/ConsoleApplicationBuilder/**/*.csproj'
+          projects: $(projects)
           verbosityRestore: '${{ parameters.verbosity }}'
 
       - task: DotNetCoreCLI@2
@@ -98,21 +75,15 @@ stages:
               --collect "Code coverage"
           testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
-      - task: DotNetCoreCLI@2
-        displayName: 'Pack'
-        inputs:
-          command: 'pack'
-          verbosityPack: '${{ parameters.verbosity }}'
-          packagesToPack: 'src/ConsoleApplicationBuilder/ConsoleApplicationBuilder/Pri.ConsoleApplicationBuilder.csproj'
-          nobuild: true
-          includeSymbols: true
-          includesource: true
-
-      - task: PublishPipelineArtifact@1
-        inputs:
-          artifactName: 'NuGet'
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-          publishLocation: 'pipeline'
+  - template: templates/jobs/build-and-pack-nuget-job.yml
+    parameters:
+      displayName: 'Pack NuGet'
+      dependsOn: 'Build'
+      majorVersion: ${{ variables.majorVersion }}
+      minorVersion: ${{ variables.minorVersion }}
+      dotNetVersion: $(dotNetVersion)
+      projects: $(projects)
+      packagesToPack: 'src/ConsoleApplicationBuilder/ConsoleApplicationBuilder/Pri.ConsoleApplicationBuilder.csproj'
 
 # to create a service connection for NuGet
 #   - see also: https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml

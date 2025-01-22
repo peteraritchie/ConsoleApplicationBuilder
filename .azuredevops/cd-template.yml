@@ -33,14 +33,14 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  sourceDir: 'src/dotnet-new-template'
+  majorVersion: '1'
+  minorVersion: '1'
   dotNetVersion: '8.x'
+  sourceDir: 'src/dotnet-new-template'
   buildConfiguration: 'Release'
   nugetServiceConnection: 'Nuget - PRI.ConsoleApplicationBuilder' # 'TestNuGet - PRI-ConsoleApplicationBuilder'
-  majorVersion: '1'
-  minorVersion: '0'
-  patchVersion: $[counter(format('{0}-{1}',variables['majorVersion'],variables['minorVersion']), 1)]
-  buildVersion: $[counter(format('{0}-{1}-{2}',variables['majorVersion'],variables['minorVersion'],variables['versionSuffixType']), 1)]
+  patchVersion: $[counter(format('{0}-{1}', variables['majorVersion'], variables['minorVersion']), 0)]
+  buildVersion: $[counter(format('{0}-{1}-{2}', variables['majorVersion'], variables['minorVersion'], variables['versionSuffixType']), 0)]
   ${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
     versionSuffix: '-${{ parameters.versionSuffixType }}$(buildVersion)'
   ${{ else }}:
