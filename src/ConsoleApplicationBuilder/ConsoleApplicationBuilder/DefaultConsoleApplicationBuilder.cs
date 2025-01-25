@@ -29,7 +29,7 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 		ArgumentNullException.ThrowIfNull(settings);
 
 		Configuration = settings.Configuration ?? new ConfigurationManager();
-		var args = settings.Args ?? [];
+		var args = settings.Args!;
 
 		Configuration.AddEnvironmentVariables(prefix: "DOTNET_");
 
@@ -44,12 +44,20 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 			builder.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: reloadOnChange);
 		}
 
-		if (env.IsDevelopment() && env.ApplicationName is { Length: > 0 })
+		if (env.IsDevelopment() && env.ApplicationName.Length > 0)
 		{
-			_ = TrySetUserSecrets(Configuration, env.ApplicationName, reloadOnChange);
+			try
+			{
+				var appAssembly = Assembly.Load(new AssemblyName(env.ApplicationName));
+				Configuration.AddUserSecrets(appAssembly, optional: true, reloadOnChange: reloadOnChange);
+			}
+			catch (FileNotFoundException)
+			{
+				// The assembly cannot be found, so just skip it.;
+			}
 		}
 
-		if (args is { Length: > 0 })
+		if (args.Length > 0 )
 		{
 			Configuration.AddCommandLine(args);
 		}
@@ -78,22 +86,6 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 				       ? result
 				       : throw new InvalidOperationException(
 					       $"Failed to convert configuration value at '{configuration.GetSection(reloadConfigOnChangeKey).Path}' to type '{typeof(bool)}'."));
-		}
-
-		[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-		static bool TrySetUserSecrets(IConfigurationBuilder configuration, string envApplicationName, bool reloadOnChange)
-		{
-			try
-			{
-				var appAssembly = Assembly.Load(new AssemblyName(envApplicationName));
-				configuration.AddUserSecrets(appAssembly, optional: true, reloadOnChange: reloadOnChange);
-				return true;
-			}
-			catch (FileNotFoundException)
-			{
-				// The assembly cannot be found, so just skip it.;
-			}
-			return false;
 		}
 	}
 
@@ -126,14 +118,14 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 		string? envApplicationName = configuration[HostDefaults.ApplicationKey];
 		if (string.IsNullOrEmpty(envApplicationName))
 		{
-			envApplicationName = Assembly.GetEntryAssembly()?.GetName().Name;
+			envApplicationName = Assembly.GetEntryAssembly()!.GetName().Name;
 		}
 
 		string contentRootPath = ResolveContentRootPath(configuration[HostDefaults.ContentRootKey]);
 		return new ApplicationEnvironment
 		{
 			EnvironmentName = configuration[HostDefaults.EnvironmentKey] ?? Environments.Production,
-			ApplicationName = envApplicationName ?? string.Empty,
+			ApplicationName = envApplicationName!,
 			ContentRootPath = contentRootPath,
 			ContentRootFileProvider = new PhysicalFileProvider(contentRootPath)
 		};

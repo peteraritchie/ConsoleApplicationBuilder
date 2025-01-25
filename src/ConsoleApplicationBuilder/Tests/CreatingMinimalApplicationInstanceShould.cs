@@ -9,8 +9,18 @@ public class CreatingMinimalApplicationInstanceShould
 	public void BuildCorrectly()
 	{
 		var builder = ConsoleApplication.CreateBuilder([]);
+		Assert.Empty(builder.Properties);
+		Assert.NotNull(builder.Metrics);
+		Assert.NotNull(builder.Metrics.Services);
+		Assert.NotNull(builder.Configuration);
 		var o = builder.Build<Program>();
 		Assert.NotNull(o);
+	}
+
+	[Fact]
+	public void CreateBuilderThrowsWithInvalidArgs()
+	{
+		Assert.Throws<ArgumentNullException>(() => ConsoleApplication.CreateBuilder((string[])null!));
 	}
 
 	[Fact]
@@ -52,6 +62,56 @@ public class CreatingMinimalApplicationInstanceShould
 		var builder = ConsoleApplication.CreateBuilder(args);
 		var o = builder.Build<Program>();
 		Assert.Equal("value", o.Configuration["key"]);
+	}
+
+	[Fact]
+	public void HaveCorrectOverridenUnRootedContentRootPath()
+	{
+		Environment.SetEnvironmentVariable("DOTNET_contentRoot", "..");
+		try
+		{
+			var builder = ConsoleApplication.CreateBuilder([]);
+			Assert.EndsWith("..", builder.Environment.ContentRootPath);
+			var o = builder.Build<Program>();
+		}
+		finally
+		{
+			Environment.SetEnvironmentVariable("DOTNET_contentRoot", null);
+		}
+	}
+
+	[Fact]
+	public void HaveCorrectOverridenRootedContentRootPath()
+	{
+		Environment.SetEnvironmentVariable("DOTNET_contentRoot", @"C:\");
+		try
+		{
+			var builder = ConsoleApplication.CreateBuilder([]);
+			Assert.Equal(@"C:\", builder.Environment.ContentRootPath);
+			var o = builder.Build<Program>();
+		}
+		finally
+		{
+			Environment.SetEnvironmentVariable("DOTNET_contentRoot", null);
+		}
+	}
+
+	[Fact]
+	public void DevelopmentAppSettingsWithOtherTestRunnerDoesNotThrow()
+	{
+		Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
+		Environment.SetEnvironmentVariable("DOTNET_APPLICATIONNAME", "StrangeTestRunner");
+		try
+		{
+			var builder = ConsoleApplication.CreateBuilder([]);
+			var o = builder.Build<Program>();
+			Assert.Equal("development", o.Configuration["developmentAppSettingsKey"]);
+		}
+		finally
+		{
+			Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", null);
+			Environment.SetEnvironmentVariable("DOTNET_APPLICATIONNAME", null);
+		}
 	}
 
 	[Fact]
