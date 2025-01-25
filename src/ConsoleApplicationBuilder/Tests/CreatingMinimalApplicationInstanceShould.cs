@@ -83,11 +83,11 @@ public class CreatingMinimalApplicationInstanceShould
 	[Fact]
 	public void HaveCorrectOverridenRootedContentRootPath()
 	{
-		Environment.SetEnvironmentVariable("DOTNET_contentRoot", @"C:\");
+		Environment.SetEnvironmentVariable("DOTNET_contentRoot", "/");
 		try
 		{
 			var builder = ConsoleApplication.CreateBuilder([]);
-			Assert.Equal(@"C:\", builder.Environment.ContentRootPath);
+			Assert.Equal("/", builder.Environment.ContentRootPath);
 			var o = builder.Build<Program>();
 		}
 		finally
