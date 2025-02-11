@@ -1,0 +1,92 @@
+# Create GitHub release based on NuGet packages and version
+parameters:
+- name: name
+  type: string
+  default: 'github_release'
+  displayName: 'The name of the job, without spaces or dashes (-).'
+- name: displayName
+  type: string
+  default: 'Release to GitHub'
+  displayName: 'The display name of the job, displayed in pipeline runs'
+- name: targetRefspec
+  type: string
+  default: 'main'
+  displayName: 'The branch or commit hash to create the release from'
+- name: addChangeLog
+  type: boolean
+  default: true
+  displayName: 'whether to add a change log to the release'
+- name: artifactName
+  type: string
+  default: 'NuGet'
+  displayName: 'The name of the artifact to download containing one ore more NuGet packages (nupkg)'
+- name: condition
+  type: string
+  default: ''
+  displayName: 'The optional condition to evaluate to determine if the job should run'
+- name: dependsOn
+  type: string
+  displayName: 'The name of the job that produces the NuGet artifacts'
+- name: environment
+  type: string
+  displayName: 'The name of the environment that the deployment job depends upon for approval/permission.'
+- name: githubReleasesServiceConnection
+  type: string
+  displayName: 'The name of the service connection/endpoint '
+- name: repositoryName
+  type: string
+  displayName: 'The name of the GitHub repository in the form <org>/<repo>.'
+- name: packageVersion
+  type: string
+  displayName: 'The package version number text.'
+- name: majorVersion
+  type: string
+  displayName: 'The major version number of the release.'
+- name: minorVersion
+  type: string
+  displayName: 'The minor version number of the release.'
+- name: patchVersion
+  type: string
+  displayName: 'The patch version number of the release.'
+- name: buildVersion
+  type: string
+  displayName: 'The build version number of the release.'
+
+jobs:
+  - deployment: ${{ parameters.name }}
+    ${{ if ne(parameters.condition, '') }}:
+      condition: ${{ parameters.condition }}
+    dependsOn: ${{ parameters.dependsOn }}
+    ${{ if ne(parameters.displayName, '') }}:
+      displayName: ${{ parameters.displayName }}
+    environment: ${{ parameters.environment }}
+    variables:
+      packageVersion: ${{ parameters.packageVersion }}
+      majorVersion: ${{ parameters.majorVersion }}
+      minorVersion: ${{ parameters.minorVersion }}
+      patchVersion: ${{ parameters.patchVersion }}
+      buildVersion: ${{ parameters.buildVersion }}
+      artifactName: ${{ parameters.artifactName }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - download: current
+              artifact: $(artifactName)
+            - powershell: |
+                Set-Content -Path $(Pipeline.Workspace)/$(artifactName)/README.txt -Value "Product X, version $($majorVersion).$($minorVersion).$($patchVersion).$($buildVersion)"
+              displayName: 'Create readme'
+            - task: GithubRelease@1
+              displayName: 'Create GitHub Release'
+              inputs:
+                action: create
+                target: ${{ parameters.targetRefspec }}
+                gitHubConnection: ${{ parameters.githubReleasesServiceConnection }}
+                addChangeLog: ${{ parameters.addChangeLog }}
+                repositoryName: ${{ parameters.repositoryName }}
+                tagSource: userSpecifiedTag
+                tag: v$(packageVersion)
+                title: v$(packageVersion)
+                assets: |
+                  $(Pipeline.Workspace)/$(artifactName)/*.nupkg
+                  $(Pipeline.Workspace)/$(artifactName)/README.txt

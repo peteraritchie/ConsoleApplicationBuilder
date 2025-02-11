@@ -3,14 +3,18 @@ parameters:
 - name: name
   type: string
   default: 'pack'
+  displayName: 'The name of the job, without spaces or dashes (-).'
 - name: displayName
   type: string
+  displayName: 'The display name of the job, displayed in pipeline runs.'
 - name: majorVersion
   type: number
   default: 1
+  displayName: 'The major version number of the package.'
 - name: minorVersion
   type: number
   default: 0
+  displayName: 'The minor version number of the package.'
 - name: versionSuffixType
   type: string
   default: 'none'
@@ -19,21 +23,33 @@ parameters:
   - 'beta'
   - 'alpha'
   - 'none'
+  displayName: 'The version suffix of the package (none, rc, beta, or alpha).'
 - name: projects
   type: string
+  displayName: 'A file matching pattern for the projects to restore and build.'
 - name: packagesToPack
   type: string
+  displayName: 'A file matching pattern for the packages to pack].'
 - name: artifactName
   type: string
   default: 'NuGet'
+  displayName: 'The name of the artifact to upload containing one ore more NuGet packages (nupkg)'
+- name: condition
+  type: string
+  default: ''
+  displayName: 'The optional condition to evaluate to determine if the job should run'
 - name: dependsOn
   type: string
+  displayName: 'the name of the job that produces the NuGet artifacts'
 - name: dotNetVersion
   type: string
   default: '8.x'
+  displayName: 'The version of the .NET core SDK. e.g. 8.x, 8.0.x, 8.0.12. '
 
 jobs:
 - job: ${{ parameters.name }}
+  ${{ if ne(parameters.condition, '') }}:
+    condition: ${{ parameters.condition }}
   dependsOn: ${{ parameters.dependsOn }}
   variables:
     # Patch version MUST be reset to 0 when minor version is incremented.
@@ -47,6 +63,9 @@ jobs:
       versionSuffix: $[replace(format('{0}.{1}', '${{ parameters.versionSuffixType }}', variables['buildVersion'] ), '.0', '')]
 
   steps:
+    - powershell: 'echo "executing ${{ parameters.name }} for $(versionPrefix) and $(versionSuffix)"'
+      condition: eq(variables['Agent.Diagnostic'], 'true')
+
     - task: UseDotNet@2
       displayName: 'Use .NET SDK 8.0'
       inputs:
@@ -86,3 +105,17 @@ jobs:
         artifactName: ${{ parameters.artifactName }}
         targetPath: '$(Build.ArtifactStagingDirectory)'
         publishLocation: 'pipeline'
+
+    - powershell: |
+        if('' -eq $(versionPrefix)) {
+          Write-Host "##vso[task.setvariable variable=packageVersion;isOutput=true]$(versionPrefix)"
+        } else {
+          Write-Host "##vso[task.setvariable variable=packageVersion;isOutput=true]$(versionPrefix)-$(versionSuffix)"
+        }
+        Write-Host "##vso[task.setvariable variable=assemblyVersion;isOutput=true]$(versionPrefix).$(buildVersion)"
+        Write-Host "##vso[task.setvariable variable=majorVersion;isOutput=true]${{ parameters.majorVersion }}"
+        Write-Host "##vso[task.setvariable variable=minorVersion;isOutput=true]${{ parameters.minorVersion }}"
+        Write-Host "##vso[task.setvariable variable=patchVersion;isOutput=true]$(patchVersion)"
+        Write-Host "##vso[task.setvariable variable=buildVersion;isOutput=true]$(buildVersion)"
+      name: versions
+      displayName: 'Output calculated version values'

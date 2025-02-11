@@ -25,8 +25,8 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  majorVersion: '1'
-  minorVersion: '1'
+  majorVersion: 1
+  minorVersion: 1
   projects: 'src/ConsoleApplicationBuilder/**/*.csproj'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
@@ -43,7 +43,7 @@ variables:
 
 stages:
 - stage: build_test
-  displayName: 'Build, Test, and Pack'
+  displayName: 'Build and Test'
   jobs:
   - job: Build
     displayName: 'Build and Test'

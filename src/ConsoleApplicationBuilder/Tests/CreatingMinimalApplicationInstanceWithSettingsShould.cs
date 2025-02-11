@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Pri.ConsoleApplicationBuilder.Tests;
 
-[Collection("Environment")]
+[Collection("Isolated Execution Collection")]
 public class CreatingMinimalApplicationInstanceWithSettingsShould
 {
 	[Fact]

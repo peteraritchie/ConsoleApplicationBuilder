@@ -1,23 +1,23 @@
-﻿using System.Reflection;
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
+
+using Pri.ConsoleApplicationBuilder.Tests.SystemCommandLine;
 
 namespace Pri.ConsoleApplicationBuilder.Tests;
 
-[Collection("Environment")]
+[Collection("Isolated Execution Collection")]
 public class ApplicationEnvironmentShould
 {
 	[Fact ]
 	public void HaveReflectedApplicationName()
 	{
 		string[] args = [];
-		if (Assembly.GetEntryAssembly()?.GetName().Name == "ReSharperTestRunner")
+		if (Utility.ExecutingTestRunnerName == Constants.ReSharperTestRunnerName)
 		{
 			Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", null);
 		}
 		var builder = ConsoleApplication.CreateBuilder(args);
-		Assert.True(builder.Environment.ApplicationName is "testhost" or "ReSharperTestRunner");
+		Assert.True(builder.Environment.ApplicationName is Constants.VisualStudioTestRunnerName or Constants.ReSharperTestRunnerName);
 		Assert.Equal("Production", builder.Environment.EnvironmentName);
 		Assert.IsType<PhysicalFileProvider>(builder.Environment.ContentRootFileProvider);
 	}
@@ -40,6 +40,7 @@ public class ApplicationEnvironmentShould
 		Assert.Equal("value", o.Configuration["key"]);
 	}
 
+	// ReSharper disable once ClassNeverInstantiated.Local
 	private class Program(IConfiguration configuration)
 	{
 		public IConfiguration Configuration { get; } = configuration;

@@ -13,7 +13,7 @@ There are a number of common practices to structuring a repository. Each reposit
 
 ## Rationale
 - src
-  - It's essential for one or more build pipelines to be triggered indepenently by changes to the source code. The source code is the most important part of the repository, so it should be at the root of the repository.
+  - It's essential for one or more build pipelines to be triggered independently by changes to the source code. The source code is the most important part of the repository, so it should be at the root of the repository.
   - contains all the content that will be used to generate deployables
 - .azuredevops
   - It's useful for one or more piplines to be triggered idenpendently by changes to Azure DevOps configuration. `.azuredevops` is a recognized location for storing Azure DevOps configuration files. \[[1][pr-templates]\]
