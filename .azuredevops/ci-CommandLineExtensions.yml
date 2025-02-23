@@ -1,0 +1,114 @@
+parameters:
+- name: verbosity
+  displayName: 'verbosity of this run'
+  type: string
+  default: Minimal
+  values:
+  - Detailed
+  - Quiet
+  - Diagnostic
+  - Minimal
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src/CommandLineExtensions
+      - .azuredevops/ci-CommandLineExtensions.yml
+      - .azuredevops/templates
+
+pr: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  majorVersion: 1
+  minorVersion: 1
+  projects: 'src/CommandLineExtensions/*.csproj'
+  dotNetVersion: '8.x'
+  buildConfiguration: 'Release'
+  nugetServiceConnection: 'Nuget - PRI.CommandLineExtensions' # 'TestNuGet - PRI-CommandLineExtensions'
+  testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
+  ${{ if eq(parameters.verbosity, 'Quiet') }}:
+    dotnetVerbosity: q # Quiet
+  ${{ elseif eq(parameters.verbosity, 'Detailed') }}:
+    dotnetVerbosity: d # Detailed
+  ${{ elseif eq(parameters.verbosity, 'Diagnostic') }}:
+    dotnetVerbosity: diag # Diagnostic
+  ${{ else }}:
+    dotnetVerbosity: m # Minimal
+
+stages:
+- stage: build_test
+  displayName: 'Build and Test'
+  jobs:
+  - job: Build
+    displayName: 'Build and Test'
+    steps:
+      - task: UseDotNet@2
+        displayName: 'Use .NET SDK $(dotNetVersion)'
+        inputs:
+          packageType: sdk
+          version: $(dotNetVersion)
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore project dependencies'
+        inputs:
+          command: 'restore'
+          projects: $(projects)
+          verbosityRestore: '${{ parameters.verbosity }}'
+
+      - task: DotNetCoreCLI@2
+        # run tests and publish results/coverage to Azure DevOps
+        displayName: 'Dotnet Build/Test - $(buildConfiguration)'
+        inputs:
+          command: 'test'
+          projects: $(testProjects)
+          arguments: >-
+              --no-restore
+              -c $(buildConfiguration)
+              --nologo
+              -v $(dotnetVerbosity)
+              /clp:ErrorsOnly
+              --collect "Code coverage"
+          testRunTitle: 'Dotnet Test - $(buildConfiguration)'
+
+  - template: templates/jobs/build-and-pack-nuget-job.yml
+    parameters:
+      displayName: 'Pack NuGet'
+      dependsOn: 'Build'
+      majorVersion: ${{ variables.majorVersion }}
+      minorVersion: ${{ variables.minorVersion }}
+      dotNetVersion: $(dotNetVersion)
+      projects: $(projects)
+      packagesToPack: 'src/CommandLineExtensions/Pri.CommandLineExtensions.csproj'
+
+# to create a service connection for NuGet
+#   - see also: https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
+# to create an environment for the service connection
+#   - see also: https://learn.microsoft.com/en-us/azure/deployment-environments/how-to-create-access-environments
+- stage: nuget_publish
+  displayName: 'NuGet Publish'
+  dependsOn: build_test
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - deployment: nuget_push
+    displayName: 'NuGet Push'
+    environment: 'NuGet'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: 'NuGet'
+                targetPath: '$(Build.ArtifactStagingDirectory)'
+            - task: NuGetCommand@2
+              displayName: 'NuGet Push'
+              inputs:
+                command: push
+                nuGetFeedType: external
+                publishFeedCredentials: $(nugetServiceConnection)
