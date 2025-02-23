@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>System.CommandLine Extensions</Title>
+    <Authors>Peter Ritchie</Authors>
+    <Product>Console Application Builder</Product>
+    <Description>System.CommandLine extensions to support .NET Dendency Injection..</Description>
+    <Copyright>©️ 2025 Peter Ritchie</Copyright>
+    <PackageProjectUrl>https://github.com/peteraritchie/ConsoleApplicationBuilder</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <RepositoryUrl>https://github.com/peteraritchie/ConsoleApplicationBuilder</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>dotnet .net console System.CommandLine command-line dependency-injection</PackageTags>
+    <IncludeSymbols>True</IncludeSymbols>
+    <PackageId>PRI.ConsoleApplicationBuilder</PackageId>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;NU5104</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;nu5104</NoWarn>
+    <WarningLevel>0</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Pri.ConsoleApplicationBuilder.Tests" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+</Project>
