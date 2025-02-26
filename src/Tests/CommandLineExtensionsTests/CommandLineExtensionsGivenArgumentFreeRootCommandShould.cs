@@ -2,6 +2,8 @@
 using System.CommandLine.Parsing;
 using System.Text;
 
+using CommandLineExtensionsTests.TestDoubles;
+
 using Microsoft.Extensions.DependencyInjection;
 
 using Pri.CommandLineExtensions;
@@ -29,7 +31,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 	[Fact]
 	public void SetAliasCorrectly()
 	{
-		var builder = ConsoleApplication.CreateBuilder((string[])[]);
+		var builder = ConsoleApplication.CreateBuilder([]);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
 			.WithAlias("alias")
@@ -42,7 +44,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 	[Fact]
 	public void HaveUnAliasedCommandCorrectly()
 	{
-		var builder = ConsoleApplication.CreateBuilder((string[])[]);
+		var builder = ConsoleApplication.CreateBuilder([]);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
 			.WithHandler(() => { });
@@ -58,7 +60,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 		var errStringBuilder = new StringBuilder();
 		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
 
-		var builder = ConsoleApplication.CreateBuilder((string[])[]);
+		var builder = ConsoleApplication.CreateBuilder([]);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
 			.WithHandler(() => { });
@@ -66,13 +68,12 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 		var command = builder.Build<RootCommand>();
 		command.Invoke("--help", console);
 
-		var testRunnerName = Utility.ExecutingTestRunnerName;
 		Assert.Equal($"""
 		              Description:
 		                command description
 
 		              Usage:
-		                {testRunnerName} [options]
+		                {Utility.ExecutingTestRunnerName} [options]
 
 		              Options:
 		                --version       Show version information
@@ -91,7 +92,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 		var errStringBuilder = new StringBuilder();
 		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
 
-		var builder = ConsoleApplication.CreateBuilder((string[])[]);
+		var builder = ConsoleApplication.CreateBuilder([]);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
 			.WithAlias("alias")
@@ -100,21 +101,20 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 		var command = builder.Build<RootCommand>();
 		command.Invoke("--help", console);
 
-		var testRunnerName = Utility.ExecutingTestRunnerName;
 		Assert.Equal($"""
-		             Description:
-		               command description
+		              Description:
+		                command description
 
-		             Usage:
-		               {testRunnerName} [options]
+		              Usage:
+		                {Utility.ExecutingTestRunnerName} [options]
 
-		             Options:
-		               --version       Show version information
-		               -?, -h, --help  Show help and usage information
+		              Options:
+		                --version       Show version information
+		                -?, -h, --help  Show help and usage information
 
 
 
-		             """, outStringBuilder.ToString());
+		              """, outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
@@ -179,35 +179,5 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 		var command = builder.Build<RootCommand>();
 		Assert.Equal(0, command.Invoke(args));
 		Assert.True(handlerSpy.WasExecuted);
-	}
-}
-
-public class HandlerSpy : ICommandHandler
-{
-	internal bool WasExecuted { get; private set; }
-	public void Execute()
-	{
-		WasExecuted = true;
-	}
-}
-
-public class SclTests
-{
-	[Fact]
-	public void TestWithOptionAndArgument()
-	{
-		string[] args = ["--option", "optionValue", "argumentValue"];
-		var rootCommand = new RootCommand("Test command");
-		rootCommand.AddOption(new Option<string>("--option", "Option description") { IsRequired = true});
-		rootCommand.AddArgument(new Argument<string>("argument", "Argument description"));
-		bool wasExecuted = false;
-		rootCommand.SetHandler(context => {
-			wasExecuted = true;
-		});
-		var r = rootCommand.Parse(args);
-		Assert.Empty(r.Errors);
-		var r2 = rootCommand.Invoke(args);
-		Assert.Equal(0, r2);
-		Assert.True(wasExecuted);
 	}
 }

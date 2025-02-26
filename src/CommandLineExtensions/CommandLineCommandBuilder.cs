@@ -11,10 +11,10 @@ namespace Pri.CommandLineExtensions;
 /// </summary>
 internal class CommandLineCommandBuilder : CommandLineCommandBuilderBase, ICommandLineCommandBuilder
 {
-	private Action? handler;
+	private Func<Task>? handler;
 
 	/// <summary>
-	/// Builds out a command line command
+	/// Create a builder with an existing command.
 	/// </summary>
 	/// <param name="services"></param>
 	/// <param name="command"></param>
@@ -23,15 +23,24 @@ internal class CommandLineCommandBuilder : CommandLineCommandBuilderBase, IComma
 		Command = command;
 	}
 
+	/// <summary>
+	/// Create a builder with a type to instantiate later.
+	/// </summary>
+	/// <param name="services"></param>
+	/// <param name="commandType"></param>
 	public CommandLineCommandBuilder(IServiceCollection services, Type commandType) : base(services)
 	{
 		CommandType = commandType;
 	}
 
-	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage(Justification = "TODO:")]
+	/// <summary>
+	/// Create a builder with a command factory to invoke later.
+	/// </summary>
+	/// <param name="services"></param>
+	/// <param name="commandFactory"></param>
 	public CommandLineCommandBuilder(IServiceCollection services,
 		Type commandType,
-		Func<Command> commandFactory)
+		Func<IServiceProvider, Command> commandFactory)
 		: base(services)
 	{
 		CommandType = commandType;
@@ -155,7 +164,55 @@ internal class CommandLineCommandBuilder : CommandLineCommandBuilderBase, IComma
 		if (handler is not null) throw new InvalidOperationException("Cannot add a handler twice.");
 #endif
 
-		handler = action;
+		handler = action switch
+		{
+			null => null,
+			_ => () =>
+			{
+				action();
+				return Task.FromResult(0);
+			}
+		};
+		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
+
+		return serviceCollection; // builder terminal
+	}
+
+	/// <inheritsdoc />
+	public IServiceCollection WithHandler(Func<int> func)
+	{
+		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
+		Debug.Assert(handler is null);
+#if UNREACHABLE
+		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
+		if (handler is not null) throw new InvalidOperationException("Cannot add a handler twice.");
+#endif
+
+		handler = func switch
+		{
+			null => null,
+			_ => () => Task.FromResult(func())
+		};
+		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
+
+		return serviceCollection; // builder terminal
+	}
+
+	/// <inheritsdoc />
+	public IServiceCollection WithHandler(Func<Task> func)
+	{
+		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
+		Debug.Assert(handler is null);
+#if UNREACHABLE
+		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
+		if (handler is not null) throw new InvalidOperationException("Cannot add a handler twice.");
+#endif
+
+		handler = func switch
+		{
+			null => null,
+			_ => async () => await func()
+		};
 		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
 
 		return serviceCollection; // builder terminal
@@ -180,7 +237,7 @@ internal class CommandLineCommandBuilder : CommandLineCommandBuilderBase, IComma
 	private Command BuildCommand(IServiceProvider provider)
 	{
 		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
-		Command command = GetCommand();
+		Command command = GetCommand(provider);
 
 		if (CommandDescription is not null) command.Description = CommandDescription;
 		if (CommandAlias is not null) command.AddAlias(CommandAlias);
@@ -193,21 +250,25 @@ internal class CommandLineCommandBuilder : CommandLineCommandBuilderBase, IComma
 				command.AddCommand(subcommand);
 			}
 		}
-		else // don't need a root command handler with subcommands, so ignore any we may have.
+
+		Func<Task> actualHandler;
+		if (commandHandlerType is not null)
 		{
-			Action actualHandler;
-			if (commandHandlerType is not null)
+			// get a handler object with all the dependencies resolved and injected
+			var commandHandler = provider.GetRequiredService<ICommandHandler>();
+			actualHandler = () =>
 			{
-				// get a handler object with all the dependencies resolved and injected
-				var commandHandler = provider.GetRequiredService<ICommandHandler>();
-				actualHandler = () => commandHandler.Execute();
-			}
-			else
-			{
-				actualHandler = handler ?? throw new InvalidOperationException("Cannot build a command without a handler.");
-			}
-			command.SetHandler(actualHandler);
+				commandHandler.Execute();
+				return Task.FromResult(0);
+			};
 		}
+		else
+		{
+			actualHandler = handler ?? throw new InvalidOperationException("Cannot build a command without a handler.");
+		}
+
+		command.SetHandler(actualHandler);
+
 		return command;
 	}
 }

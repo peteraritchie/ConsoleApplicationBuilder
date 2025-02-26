@@ -47,6 +47,20 @@ public class CommandLineExtensionsGivenCommandWithOneOptionShould
 	}
 
 	[Fact]
+	public void CorrectlyInvokeCommandWithDefaultWithLambdaHandler()
+	{
+		string[] args = [Constants.FileOptionName, "appsettings.json"];
+		FileInfoHandlerSpy fileInfoHandlerSpy = new();
+
+		RootCommand command = BuildCommand(args, fileInfoHandlerSpy);
+
+		Assert.Equal(0, command.Invoke(args));
+		Assert.True(fileInfoHandlerSpy.WasExecuted);
+		Assert.NotNull(fileInfoHandlerSpy.GivenFileInfo);
+		Assert.Equal(new FileInfo(@".\appsettings.json").FullName, fileInfoHandlerSpy.GivenFileInfo!.FullName);
+	}
+
+	[Fact]
 	public void CorrectlyBuildCommandWithObjectHandler()
 	{
 		string[] args = [Constants.FileOptionName, "appsettings.json"];

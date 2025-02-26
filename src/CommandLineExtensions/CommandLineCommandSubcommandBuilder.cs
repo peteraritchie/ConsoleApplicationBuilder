@@ -9,7 +9,7 @@ internal class CommandLineCommandSubcommandBuilder<TSubcommand>
 	where TSubcommand : Command, new()
 {
 	private readonly ICommandLineCommandBuilder parent;
-	private Action? handler;
+	private Func<Task>? handler;
 
 	public CommandLineCommandSubcommandBuilder(ICommandLineCommandBuilder parent, IServiceCollection serviceCollection) : base(serviceCollection)
 	{
@@ -36,7 +36,15 @@ internal class CommandLineCommandSubcommandBuilder<TSubcommand>
 	/// <inheritsdoc />
 	public ICommandLineCommandBuilder WithSubcommandHandler(Action action)
 	{
-		handler = action;
+		handler = action switch
+		{
+			null => null,
+			_ => () =>
+			{
+				action();
+				return Task.FromResult(0);
+			}
+		};
 
 		return parent;
 	}

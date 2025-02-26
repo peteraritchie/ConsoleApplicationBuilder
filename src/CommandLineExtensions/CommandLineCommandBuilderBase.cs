@@ -13,7 +13,7 @@ namespace Pri.CommandLineExtensions;
 internal class CommandLineCommandBuilderBase(IServiceCollection services)
 {
 	protected readonly IServiceCollection serviceCollection = services;
-	protected List<ParamSpec> paramSpecs = [];
+	protected readonly List<ParamSpec> paramSpecs = [];
 	protected Type? commandHandlerType;
 	protected readonly List<Type> subcommands = [];
 
@@ -44,7 +44,7 @@ internal class CommandLineCommandBuilderBase(IServiceCollection services)
 
 	protected Type? CommandType { get; init; }
 
-	protected Func<Command>? CommandFactory { get; init; }
+	protected Func<IServiceProvider, Command>? CommandFactory { get; init; }
 
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage(Justification =
 		"Lifted from System.CommandLine, assuming a high level of quality")]
@@ -58,6 +58,7 @@ internal class CommandLineCommandBuilderBase(IServiceCollection services)
 		{
 			return value;
 		}
+
 		return descriptor switch
 		{
 			Argument<T> argument => context.ParseResult.GetValueForArgument(argument),
@@ -75,13 +76,13 @@ internal class CommandLineCommandBuilderBase(IServiceCollection services)
 				"Either command or command type is required to build commandline command.");
 	}
 
-	protected Command GetCommand()
+	protected Command GetCommand(IServiceProvider provider)
 	{
 		// Use `Command` if there, otherwise try CommandFactory/CommandType pair,
 		// or fall back to activator on the Type
 		return Command ?? (
 			CommandFactory is not null
-				? CommandFactory()
+				? CommandFactory(provider)
 				: CommandType is not null
 					? (Command)Activator.CreateInstance(CommandType)!
 					: throw new InvalidOperationException()

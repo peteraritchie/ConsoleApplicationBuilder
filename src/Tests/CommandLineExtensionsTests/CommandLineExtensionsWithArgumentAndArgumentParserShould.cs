@@ -1,0 +1,101 @@
+﻿using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Text;
+
+using CommandLineExtensionsTests.TestDoubles;
+
+using Pri.CommandLineExtensions;
+using Pri.ConsoleApplicationBuilder;
+
+namespace CommandLineExtensionsTests;
+
+public class CommandLineExtensionsWithArgumentAndArgumentParserShould
+{
+	[Fact]
+	public void Build()
+	{
+		string[] args = ["2"];
+		bool handlerInvoked = false;
+		bool parserInvoked = false;
+		var command = BuildCommand(args, _ => handlerInvoked = true, (result) =>
+		{
+			parserInvoked = true;
+			return int.Parse(result.Tokens.First().Value);
+		});
+		Assert.NotNull(command);
+		Assert.False(handlerInvoked);
+		Assert.False(parserInvoked);
+	}
+
+	[Fact]
+	public void Invoke()
+	{
+		string[] args = ["2"];
+		int actualCount = -1;
+		bool handlerInvoked = false;
+		bool parserInvoked = false;
+		var command = BuildCommand(args,
+			count =>
+			{
+				handlerInvoked = true;
+				actualCount = count;
+			},
+			result =>
+			{
+				parserInvoked = true;
+				return int.Parse(result.Tokens.First().Value);
+			});
+		command.Invoke(args);
+		Assert.True(handlerInvoked);
+		Assert.True(parserInvoked);
+		Assert.Equal(2, actualCount);
+	}
+
+	[Fact]
+	public void OutputHelp()
+	{
+		string[] args = ["2"];
+		bool handlerInvoked = false;
+		bool parserInvoked = false;
+		var command = BuildCommand(args, _ => handlerInvoked = true, (result) =>
+		{
+			parserInvoked = true;
+			return int.Parse(result.Tokens.First().Value);
+		});
+		var outStringBuilder = new StringBuilder();
+		var errStringBuilder = new StringBuilder();
+		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
+
+		command.Invoke(["--help"], console);
+		Assert.Equal($"""
+		              Description:
+
+		              Usage:
+		                {Utility.ExecutingTestRunnerName} <count> [options]
+
+		              Arguments:
+		                <count>  number of times to repeat.
+
+		              Options:
+		                --version       Show version information
+		                -?, -h, --help  Show help and usage information
+
+
+
+
+		              """, outStringBuilder.ToString());
+		Assert.Equal(string.Empty, errStringBuilder.ToString());
+		Assert.False(handlerInvoked);
+		Assert.False(parserInvoked);
+	}
+
+	private static Command BuildCommand(string[] args, Action<int> action, ParseArgument<int> argumentParser)
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand(new NullCommand())
+			.WithArgument<int>("count", "number of times to repeat.")
+			.WithArgumentParser(argumentParser)
+			.WithHandler(action);
+		return builder.Build<NullCommand>();
+	}
+}

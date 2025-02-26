@@ -1,6 +1,8 @@
 ﻿using System.CommandLine;
 using System.Text;
 
+using CommandLineExtensionsTests.TestDoubles;
+
 using Pri.CommandLineExtensions;
 using Pri.ConsoleApplicationBuilder;
 
@@ -109,15 +111,14 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		Assert.Equal("Action must be set before building the subcommand.", ex.Message);
 	}
 
-	[Fact(Skip="Made unreachable")]
+	[Fact]
 	public void CorrectlyThrowsWithNullCommandHandler()
 	{
 		var builder = ConsoleApplication.CreateBuilder([]);
 		builder.Services.AddCommand<NonRootCommand>()
 			.WithDescription("command description")
 			.WithSubcommand<Subcommand>()
-			.WithSubcommandHandler(()=>{ })
-			.WithHandler(null!);
+			.WithSubcommandHandler(()=>{ }).WithHandler((Action)null!);
 
 		var ex = Assert.Throws<InvalidOperationException>(builder.Build<NonRootCommand>);
 		Assert.Equal("Cannot build a command without a handler.", ex.Message);
@@ -219,5 +220,4 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 	}
 
 	public class NonRootCommand() : Command("analyze", "Analyze something.");
-	public class Subcommand() : Command("dependencies", "Analyze dependencies.");
 }

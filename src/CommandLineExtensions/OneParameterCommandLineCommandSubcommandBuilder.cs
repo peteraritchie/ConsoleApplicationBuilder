@@ -4,22 +4,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Pri.CommandLineExtensions;
 
-internal class TwoParameterCommandLineCommandSubcommandBuilder<TParam1, TParam2, TSubcommand>
-	: CommandLineCommandSubcommandBuilderBase, ITwoParameterCommandLineCommandSubcommandBuilder<TParam1, TParam2, TSubcommand>
+internal class OneParameterCommandLineCommandSubcommandBuilder<TParam, TSubcommand>
+	: CommandLineCommandSubcommandBuilderBase, IOneParameterCommandLineCommandSubcommandBuilder<TParam, TSubcommand>
 	where TSubcommand : Command, new()
 {
-	private readonly ITwoParameterCommandLineCommandBuilder<TParam1, TParam2> parent;
+	private readonly IOneParameterCommandLineCommandBuilder<TParam> parent;
 	private Func<Task>? handler;
 
-	public TwoParameterCommandLineCommandSubcommandBuilder(ITwoParameterCommandLineCommandBuilder<TParam1, TParam2> twoParameterCommandLineCommandBuilder, IServiceCollection serviceCollection)
+	public OneParameterCommandLineCommandSubcommandBuilder(IOneParameterCommandLineCommandBuilder<TParam> oneParameterCommandLineCommandBuilder, IServiceCollection serviceCollection)
 		: base(serviceCollection)
 	{
-		parent = twoParameterCommandLineCommandBuilder;
+		parent = oneParameterCommandLineCommandBuilder;
 		this.serviceCollection.AddSingleton(typeof(TSubcommand), BuildCommand);
 	}
 
 	/// <inheritsdoc />
-	public ITwoParameterCommandLineCommandSubcommandBuilder<TParam1, TParam2, TSubcommand> WithDescription(string subcommandDescription)
+	public IOneParameterCommandLineCommandSubcommandBuilder<TParam, TSubcommand> WithDescription(string subcommandDescription)
 	{
 		SubcommandDescription = subcommandDescription;
 
@@ -27,7 +27,7 @@ internal class TwoParameterCommandLineCommandSubcommandBuilder<TParam1, TParam2,
 	}
 
 	/// <inheritsdoc />
-	public ITwoParameterCommandLineCommandSubcommandBuilder<TParam1, TParam2, TSubcommand> WithAlias(string subcommandAlias)
+	public IOneParameterCommandLineCommandSubcommandBuilder<TParam, TSubcommand> WithAlias(string subcommandAlias)
 	{
 		SubcommandAlias = subcommandAlias;
 
@@ -35,7 +35,7 @@ internal class TwoParameterCommandLineCommandSubcommandBuilder<TParam1, TParam2,
 	}
 
 	/// <inheritsdoc />
-	public ITwoParameterCommandLineCommandBuilder<TParam1, TParam2> WithSubcommandHandler(Action action)
+	public IOneParameterCommandLineCommandBuilder<TParam> WithSubcommandHandler(Action action)
 	{
 		handler = action switch
 		{

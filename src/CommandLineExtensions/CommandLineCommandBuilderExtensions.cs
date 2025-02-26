@@ -12,30 +12,39 @@ public static class CommandLineCommandBuilderExtensions
 	public static ICommandLineCommandBuilder AddCommand(this IServiceCollection services)
 	{
 		// TODO: check services for a RootCommand already?
-		CommandLineCommandBuilder commandLineCommandBuilder = new(services, new RootCommand());// { Command = new RootCommand() };
+		CommandLineCommandBuilder commandLineCommandBuilder = new(services, new RootCommand());
 		return commandLineCommandBuilder;
 	}
 
 	public static ICommandLineCommandBuilder AddCommand<TCommand>(this IServiceCollection services) where TCommand : Command, new()
 	{
 		// TODO: check services for a RootCommand already?
-		CommandLineCommandBuilder commandLineCommandBuilder = new(services, typeof(TCommand));// { Command = new TCommand() };
+		CommandLineCommandBuilder commandLineCommandBuilder = new(services, typeof(TCommand));
 		return commandLineCommandBuilder;
 	}
 
-#if false
-	public static CommandLineCommandBuilder AddCommand(this IServiceCollection services, Func<IServiceCollection, Command> factory)
+	/// <summary>
+	/// Add a command with a factory delegate.
+	/// </summary>
+	/// <remarks>
+	/// This is useful when the Command type doesn't have a default constructor.</remarks>
+	/// <typeparam name="TCommand"></typeparam>
+	/// <param name="services"></param>
+	/// <param name="factory"></param>
+	/// <returns></returns>
+	public static ICommandLineCommandBuilder AddCommand<TCommand>(this IServiceCollection services, Func<IServiceProvider, Command> factory)
+		where TCommand : Command
 	{
 		// TODO: check services for a RootCommand already?
-		CommandLineCommandBuilder commandLineCommandBuilder = new(services) { Command = factory(services) };
+		CommandLineCommandBuilder commandLineCommandBuilder = new(services, typeof(TCommand), factory);
 		return commandLineCommandBuilder;
 	}
 
-	public static CommandLineCommandBuilder AddCommand(this IServiceCollection services, Command command)
+	public static ICommandLineCommandBuilder AddCommand<TCommand>(this IServiceCollection services, TCommand command)
+		where TCommand : Command, new()
 	{
 		// TODO: check services for a RootCommand already?
-		CommandLineCommandBuilder commandLineCommandBuilder = new(services) { Command = command };
+		CommandLineCommandBuilder commandLineCommandBuilder = new(services, command);
 		return commandLineCommandBuilder;
 	}
-#endif
 }

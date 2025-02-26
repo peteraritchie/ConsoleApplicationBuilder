@@ -5,6 +5,15 @@ namespace CommandLineExtensionsTests;
 
 public class CommandLineBuilderTestingBase
 {
+	protected StringBuilder OutStringBuilder { get; set; }
+	protected StringBuilder ErrStringBuilder { get; set; }
+	protected IConsole Console { get; set; }
+
+	protected CommandLineBuilderTestingBase()
+	{
+		(OutStringBuilder, ErrStringBuilder, Console) = BuildConsoleSpy();
+	}
+
 	protected (StringBuilder outStringBuilder, StringBuilder errStringBuilder, IConsole console) BuildConsoleSpy()
 	{
 		var outStringBuilder = new StringBuilder();

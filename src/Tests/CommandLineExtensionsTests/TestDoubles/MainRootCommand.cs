@@ -4,11 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace CommandLineExtensionsTests.TestDoubles;
 
-public class MainRootCommand : RootCommand
+/// <summary>
+/// A command for testing.
+/// </summary>
+public class MainRootCommand(ILogger<MainRootCommand> logger) : RootCommand
 {
-	public MainRootCommand(ILogger<MainRootCommand> logger)
-	{
-		this.logger = logger;
-	}
-	private readonly ILogger<MainRootCommand> logger;
+	private readonly ILogger<MainRootCommand> logger = logger;
 }

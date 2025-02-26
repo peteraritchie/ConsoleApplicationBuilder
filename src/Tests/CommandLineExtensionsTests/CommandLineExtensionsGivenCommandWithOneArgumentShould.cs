@@ -91,7 +91,6 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 		var argument = Assert.Single(command.Arguments);
 		Assert.NotNull(argument);
 		Assert.Equal(Constants.FileArgumentName, argument.Name);
-		// TODO: check output?
 	}
 
 	[Fact]
@@ -143,6 +142,107 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 		Assert.NotNull(fileInfoHandlerSpy.GivenFileInfo);
 	}
 
+	[Fact]
+	public void CorrectlyBuildSubCommandWithObjectHandler()
+	{
+		string[] args = ["appsettings.json"];
+		FileInfoHandlerSpy fileInfoHandlerSpy = new();
+
+		var command = BuildCommandWithSubcommand(args, p => fileInfoHandlerSpy.Execute(p), () => { });
+
+		var argument = Assert.Single(command.Arguments);
+		Assert.NotNull(argument);
+		Assert.Equal(Constants.FileArgumentName, argument.Name);
+	}
+
+	[Fact]
+	public void CorrectlyInvokeSubCommandWithObjectHandler()
+	{
+		string[] args = ["appsettings.json"];
+		FileInfoHandlerSpy fileInfoHandlerSpy = new();
+		bool dependenciesSubcommandExecuted = false;
+		var command = BuildCommandWithSubcommand(args, p => fileInfoHandlerSpy.Execute(p), () =>
+		{
+			dependenciesSubcommandExecuted = true;
+		});
+
+		var outStringBuilder = new StringBuilder();
+		var errStringBuilder = new StringBuilder();
+		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
+		var exitCode = command.Invoke(["file", "dependencies"], console);
+		Assert.Equal(0, exitCode);
+		Assert.Equal(string.Empty, errStringBuilder.ToString());
+		// SCL can't tell if "dependencies" is a file or a subcommand, and it picks file and executes the command
+		Assert.True(dependenciesSubcommandExecuted);
+		Assert.False(fileInfoHandlerSpy.WasExecuted);
+	}
+
+	[Fact]
+	public void HaveExceptionWithNullHandler()
+	{
+		string[] args = ["appsettings.json"];
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithArgument<FileInfo?>(Constants.FileArgumentName, "file argument description")
+			.WithSubcommand<Subcommand>()
+			.WithDescription("Analyze dependencies")
+			.WithAlias("d")
+			.WithSubcommandHandler(null!)
+			.WithHandler(_ => { });
+
+		var ex = Assert.Throws<InvalidOperationException>(()=>builder.Build<RootCommand>());
+		Assert.Equal("Action must be set before building the subcommand.", ex.Message);
+	}
+
+	[Fact]
+	public void HaveExpectedHelpOutputWithSubCommandWithObjectHandler()
+	{
+		string[] args = ["appsettings.json"];
+		FileInfoHandlerSpy fileInfoHandlerSpy = new();
+
+		var command = BuildCommandWithSubcommand(args, p => fileInfoHandlerSpy.Execute(p), () => { });
+
+		var outStringBuilder = new StringBuilder();
+		var errStringBuilder = new StringBuilder();
+		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
+		command.Invoke("--help", console);
+
+		Assert.Equal($"""
+		              Description:
+
+		              Usage:
+		                {Utility.ExecutingTestRunnerName} <file> [command] [options]
+
+		              Arguments:
+		                <file>  file argument description
+
+		              Options:
+		                --version       Show version information
+		                -?, -h, --help  Show help and usage information
+
+
+		              Commands:
+		                d, dependencies  Analyze dependencies
+
+
+
+		              """, outStringBuilder.ToString());
+		Assert.Equal(string.Empty, errStringBuilder.ToString());
+	}
+
+	[Fact]
+	public void ThrowsBuildingCommandWithNullCommandHandler()
+	{
+		string[] args = ["appsettings.json"];
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithArgument<FileInfo?>(Constants.FileArgumentName, "file argument description")
+			.WithHandler((Action<FileInfo?>)null!);
+
+		var ex = Assert.Throws<InvalidOperationException>(() => builder.Build<RootCommand>());
+		Assert.Equal("Cannot build a command without a handler.", ex.Message);
+	}
+
 	private static IConsoleApplicationBuilder BuildCommand(string[] args, FileInfoHandlerSpy fileInfoHandlerSpy)
 	{
 		var builder = ConsoleApplication.CreateBuilder(args);
@@ -162,6 +262,21 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 			.WithDescription("command description")
 			.WithArgument<FileInfo?>(Constants.FileArgumentName, "file argument description")
 			.WithHandler(action);
+
+		var command = builder.Build<RootCommand>();
+		return command;
+	}
+
+	private static RootCommand BuildCommandWithSubcommand(string[] args, Action<FileInfo?> fileAction, Action action)
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithArgument<FileInfo?>(Constants.FileArgumentName, "file argument description")
+			.WithSubcommand<Subcommand>()
+			.WithDescription("Analyze dependencies")
+			.WithAlias("d")
+			.WithSubcommandHandler(action)
+			.WithHandler(fileAction);
 
 		var command = builder.Build<RootCommand>();
 		return command;

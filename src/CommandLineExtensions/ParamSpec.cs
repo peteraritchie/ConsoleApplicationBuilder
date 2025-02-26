@@ -1,6 +1,9 @@
 ﻿namespace Pri.CommandLineExtensions;
 
-internal class ParamSpec
+/// <summary>
+/// A data model for to specify the attribute used to create a parameter (Option&lt;T&gt;/Argument&lt;T&gt;)
+/// </summary>
+internal record ParamSpec
 {
 	public required string Name { get; init; }
 	public required string Description { get; init; }

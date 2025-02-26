@@ -20,7 +20,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	readonly string[] args = [Constants.FileOptionName, "appsettings.json", Constants.CountOptionName, "2"];
 
 	[Fact]
-	public void CorrectlyBuildCommandWithLambdaHandler()
+	public void BuildCommandWithLambdaHandler()
 	{
 		IConsoleApplicationBuilder builder = BuildCommandWithTwoOptions(args, (_, _) => { });
 
@@ -37,7 +37,93 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	}
 
 	[Fact]
-	public void CorrectlyInvokeCommandWithTwoOptionsAndLambdaHandler()
+	public void BuildCommandWithSameOptionTypeWithLambdaHandler()
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithDescription("command description")
+			.WithAlias("dothings")
+			.WithOption<int?>("--x", "x coordinate option description")
+			.WithOption<int?>("--y", "y coordinate option description")
+			.WithHandler((_, _) => { });
+
+		var command = builder.Build<RootCommand>();
+
+		Assert.Equal("command description", command.Description);
+		Assert.Equal(2, command.Options.Count);
+		var option1 = command.Options.ElementAtOrDefault(0);
+		Assert.NotNull(option1);
+		Assert.Equal("x", option1.Name);
+		Assert.Equal("x coordinate option description", option1.Description);
+		var option2 = command.Options.ElementAtOrDefault(1);
+		Assert.NotNull(option2);
+		Assert.Equal("y", option2.Name);
+		Assert.Equal("y coordinate option description", option2.Description);
+	}
+
+	[Fact]
+	public void InvokeCommandWithSameOptionTypeWithLambdaHandler()
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		int? givenX = 0;
+		int? givenY = 0;
+		builder.Services.AddCommand()
+			.WithOption<int?>("--x", "x coordinate option description")
+			.WithOption<int?>("--y", "y coordinate option description")
+			.WithHandler((x, y) =>
+			{
+				givenX = x;
+				givenY = y;
+			});
+
+		var command = builder.Build<RootCommand>();
+
+		Assert.Equal(0, command.Invoke(["--x","1","--y","2"]));
+		var actualX = Assert.NotNull(givenX);
+		Assert.Equal(1, actualX);
+		var actualY = Assert.NotNull(givenY);
+		Assert.Equal(2, actualY);
+	}
+
+	[Fact]
+	public void HaveExpectedHelpWithSameOptionTypeWithLambdaHandler()
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithDescription("command description")
+			.WithAlias("dothings")
+			.WithOption<int?>("--x", "x coordinate option description")
+			.WithOption<int?>("--y", "y coordinate option description")
+			.WithHandler((_, _) => { });
+
+		var command = builder.Build<RootCommand>();
+
+		var outStringBuilder = new StringBuilder();
+		var errStringBuilder = new StringBuilder();
+		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
+
+		Assert.Equal(0, command.Invoke(["--help"], console));
+		Assert.Equal($"""
+		              Description:
+		                command description
+
+		              Usage:
+		                {Utility.ExecutingTestRunnerName} [options]
+
+		              Options:
+		                --x <x>         x coordinate option description
+		                --y <y>         y coordinate option description
+		                --version       Show version information
+		                -?, -h, --help  Show help and usage information
+
+
+
+		              """, outStringBuilder.ToString());
+		Assert.Equal(string.Empty, errStringBuilder.ToString());
+	}
+
+	[Fact]
+	public void InvokeCommandWithTwoOptionsAndLambdaHandler()
 	{
 		bool itRan = false;
 		FileInfo? givenFileInfo = null;
@@ -91,7 +177,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	}
 
 	[Fact]
-	public void CorrectlyInvokeCommandWithOptionAndArgumentAndLambdaHandler()
+	public void InvokeCommandWithOptionAndArgumentAndLambdaHandler()
 	{
 		bool itRan = false;
 		FileInfo? givenFileInfo = null;
@@ -114,7 +200,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	}
 
 	[Fact]
-	public void CorrectlyThrowExceptionBuildingCommandWithOptionAndArgumentAndNullHandler()
+	public void ThrowExceptionBuildingCommandWithOptionAndArgumentAndNullHandler()
 	{
 		IConsoleApplicationBuilder builder = BuildCommandWithOptionAndArgument(args, null!);
 
@@ -146,7 +232,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	}
 
 	[Fact]
-	public void CorrectlyBuildCommandWithObjectHandler()
+	public void BuildCommandWithObjectHandler()
 	{
 		FileInfoCountHandlerSpy fileInfoCountHandlerSpy = new();
 
@@ -171,7 +257,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	}
 
 	[Fact]
-	public void CorrectlyThrowsBuildingCommandWithNullHandler()
+	public void ThrowsBuildingCommandWithNullHandler()
 	{
 		var builder = ConsoleApplication.CreateBuilder(args);
 
@@ -179,14 +265,14 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 			.WithDescription("command description")
 			.WithOption<FileInfo?>(Constants.FileOptionName, "file option description")
 			.WithOption<int?>(Constants.CountOptionName, "count option description")
-			.WithHandler(null!);
+			.WithHandler((Action<FileInfo?, int?>)null!);
 
 		var ex = Assert.Throws<InvalidOperationException>(builder.Build<RootCommand>);
 		Assert.Equal("Cannot build a command without a handler.", ex.Message);
 	}
 
 	[Fact]
-	public void CorrectlyThrowsAddingOptionAfterHandler()
+	public void ThrowsAddingOptionAfterHandler()
 	{
 		var builder = ConsoleApplication.CreateBuilder(args);
 
@@ -194,14 +280,14 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 			.WithDescription("command description")
 			.WithOption<FileInfo?>(Constants.FileOptionName, "file option description")
 			.WithOption<int?>(Constants.CountOptionName, "count option description")
-			.WithHandler(null!);
+			.WithHandler((Action<FileInfo?, int?>)null!);
 
 		var ex = Assert.Throws<InvalidOperationException>(builder.Build<RootCommand>);
 		Assert.Equal("Cannot build a command without a handler.", ex.Message);
 	}
 
-	[Fact(Skip="Follow up on why this doesn't work")]
-	public void CorrectlyInvokeNonRootCommandWithAliasAndDescription()
+	[Fact]
+	public void InvokeNonRootCommandWithAliasAndDescription()
 	{
 		bool wasRootExecuted = false;
 		var builder = ConsoleApplication.CreateBuilder([]);
@@ -212,11 +298,11 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 
 		var command = builder.Build<NonRootCommand>();
 		Assert.Equal(0, command.Invoke([]));
-		Assert.False(wasRootExecuted);
+		Assert.True(wasRootExecuted);
 	}
 
 	[Fact]
-	public void CorrectlyInvokeCommandWithAliasAndDescription()
+	public void InvokeCommandWithAliasAndDescription()
 	{
 		bool wasRootExecuted = false;
 		var builder = ConsoleApplication.CreateBuilder([]);
@@ -226,12 +312,13 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 			.WithHandler(() => wasRootExecuted = true);
 
 		var command = builder.Build<NonRootCommand>();
-		Assert.Equal(0, command.Invoke([]));
+		var (_, _, console) = BuildConsoleSpy();
+		Assert.Equal(0, command.Invoke([], console));
 		Assert.False(wasRootExecuted);
 	}
 
 	[Fact]
-	public void CorrectlyInvokeCommandWithObjectHandler()
+	public void InvokeCommandWithObjectHandler()
 	{
 		FileInfoCountHandlerSpy fileInfoCountHandlerSpy = new();
 
@@ -245,7 +332,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 			.WithHandler<FileInfoCountHandlerSpy>();
 
 		var command = builder.Build<RootCommand>();
-		var (outStringBuilder, errStringBuilder, console) = BuildConsoleSpy();
+		var (_, errStringBuilder, console) = BuildConsoleSpy();
 		int exitCode = command.Invoke(args, console);
 		Assert.Equal("", errStringBuilder.ToString());
 		Assert.Equal(0, exitCode);
@@ -256,7 +343,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 
 	#region subcommands
 	[Fact]
-	public void CorrectlyBuildCommandWithsSubCommandObjectHandler()
+	public void BuildCommandWithsSubCommandObjectHandler()
 	{
 		FileInfoCountHandlerSpy fileInfoCountHandlerSpy = new();
 
@@ -273,9 +360,15 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 
 		var command = builder.Build<RootCommand>();
 		Assert.Equal("command description", command.Description);
-		// despite setting options, because there is a subcommand,
-		// options on the root would not be used and should not be created
-		Assert.Empty(command.Options);
+		Assert.Equal(2, command.Options.Count);
+	}
+
+	[Fact]
+	public void ThrowExceptionWhenAddingSecondDescription()
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		var ex = Assert.Throws<InvalidOperationException>(() => builder.Services.AddCommand().WithDescription("peat").WithDescription("repeat"));
+		Assert.Equal("Command had existing description when WithDescription called", ex.Message);
 	}
 
 	[Fact]
@@ -311,8 +404,10 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 		                {Utility.ExecutingTestRunnerName} [command] [options]
 
 		              Options:
-		                --version       Show version information
-		                -?, -h, --help  Show help and usage information
+		                --file <file>    file option description
+		                --count <count>  count option description
+		                --version        Show version information
+		                -?, -h, --help   Show help and usage information
 
 		              Commands:
 		                dependencies, subcommand  a subcommand
@@ -323,7 +418,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	}
 
 	[Fact]
-	public void CorrectlyThrowsWithNullSubcommandHandler()
+	public void ThrowsWithNullSubcommandHandler()
 	{
 		FileInfoCountHandlerSpy fileInfoCountHandlerSpy = new();
 
@@ -344,7 +439,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 
 
 	[Fact]
-	public void CorrectlyInvokesCommandWithsSubCommandObjectHandler()
+	public void InvokesCommandWithsSubCommandObjectHandler()
 	{
 		FileInfoCountHandlerSpy fileInfoCountHandlerSpy = new();
 		bool wasSubcommandExecuted = false;
@@ -359,7 +454,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 			.WithOption<int?>(Constants.CountOptionName, "count option description")
 			.WithSubcommand<Subcommand>()
 			.WithSubcommandHandler(() => { wasSubcommandExecuted = true; })
-			/*.WithHandler((_, _) => { wasRootExecuted = true; })*/;
+			.WithHandler((_, _) => { wasRootExecuted = true; });
 
 		var command = builder.Build<RootCommand>();
 		string[] actualArgs = ["dependencies"];
@@ -373,7 +468,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	#endregion // subcommands
 
 	[Fact]
-	public void CorrectlyBuildParser()
+	public void BuildParser()
 	{
 		var builder = ConsoleApplication.CreateBuilder(args);
 

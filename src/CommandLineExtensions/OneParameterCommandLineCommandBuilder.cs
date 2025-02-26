@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Binding;
+using System.CommandLine.Parsing;
 using System.Diagnostics;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,21 @@ internal class OneParameterCommandLineCommandBuilder<TParam>(ICommandLineCommand
 	: CommandLineCommandBuilderBase((CommandLineCommandBuilderBase)commandLineCommandBuilder),
 	IOneParameterCommandLineCommandBuilder<TParam>
 {
-	private Action<TParam>? handler;
+	private Func<TParam, Task>? handler;
+	private ParseArgument<TParam>? parseArgument;
+
+	/// <inheritsdoc />
+	public IOneParameterCommandLineCommandSubcommandBuilder<TParam, TSubcommand> WithSubcommand<TSubcommand>() where TSubcommand : Command, new()
+	{
+		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
+#if UNREACHABLE
+		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a subcommand without a command.");
+#endif
+
+		subcommands.Add(typeof(TSubcommand));
+
+		return new OneParameterCommandLineCommandSubcommandBuilder<TParam, TSubcommand>(this, serviceCollection); // ?
+	}
 
 	/// <inheritsdoc />
 	public ITwoParameterCommandLineCommandBuilder<TParam, TParam2> WithOption<TParam2>(string name, string description)
@@ -65,17 +80,10 @@ internal class OneParameterCommandLineCommandBuilder<TParam>(ICommandLineCommand
 		return commandLineCommandBuilder;
 	}
 
-	/// <inheritsdoc />
-	public IServiceCollection WithHandler(Action<TParam> action)
+	public IOneParameterCommandLineCommandBuilder<TParam> WithArgumentParser(ParseArgument<TParam> argumentParser)
 	{
-		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
-#if UNREACHABLE
-		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
-#endif
-		handler = action;
-		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
-
-		return serviceCollection; // builder terminal
+		parseArgument = argumentParser;
+		return this;
 	}
 
 	/// <inheritsdoc />
@@ -94,37 +102,113 @@ internal class OneParameterCommandLineCommandBuilder<TParam>(ICommandLineCommand
 		return serviceCollection; // builder terminal
 	}
 
+	/// <inheritsdoc />
+	public IServiceCollection WithHandler(Action<TParam> action)
+	{
+		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
+#if UNREACHABLE
+		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
+#endif
+
+		handler = action switch
+		{
+			null => null,
+			_ => handler = p =>
+			{
+				action(p);
+				return Task.FromResult(0);
+			}
+		};
+
+		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
+
+		return serviceCollection; // builder terminal
+	}
+
+	/// <inheritsdoc />
+	public IServiceCollection WithHandler(Func<TParam, int> func)
+	{
+		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
+		Debug.Assert(handler is null);
+#if UNREACHABLE
+		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
+		if (handler is not null) throw new InvalidOperationException("Cannot add a handler twice.");
+#endif
+
+		handler = func switch
+		{
+			null => null,
+			_ => p => Task.FromResult(func(p))
+		};
+		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
+
+		return serviceCollection; // builder terminal
+	}
+
+	/// <inheritsdoc />
+	public IServiceCollection WithHandler(Func<TParam, Task> func)
+	{
+		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
+		Debug.Assert(handler is null);
+#if UNREACHABLE
+		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
+		if (handler is not null) throw new InvalidOperationException("Cannot add a handler twice.");
+#endif
+
+		handler = func switch
+		{
+			null => null,
+			_ => async p => await func(p)
+		};
+		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
+
+		return serviceCollection; // builder terminal
+	}
+
 	private Command BuildCommand(IServiceProvider provider)
 	{
 		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
-		Command command = GetCommand();
+		Command command = GetCommand(provider);
 
 		//else throw new InvalidOperationException();
 		if (CommandDescription is not null) command.Description = CommandDescription;
 		if (CommandAlias is not null) command.AddAlias(CommandAlias);
 
-		Action<TParam> actualHandler;
+		if (subcommands.Any())
+		{
+			foreach (var subcommandType in subcommands)
+			{
+				var subcommand = (Command)provider.GetRequiredService(subcommandType);
+				command.AddCommand(subcommand);
+			}
+		}
+		Func<TParam, Task> actualHandler;
 		if (commandHandlerType is not null)
 		{
 			// get a handler object with all the dependencies resolved and injected
 			var commandHandler = provider.GetRequiredService<ICommandHandler<TParam>>();
-			actualHandler = value => commandHandler.Execute(value);
+			actualHandler = value =>
+			{
+				commandHandler.Execute(value);
+				return Task.FromResult(0);
+			};
 		}
 		else
 		{
-			actualHandler = handler ?? throw new InvalidOperationException("Cannot build a command without a handler.");
+			if (handler is null) throw new InvalidOperationException("Cannot build a command without a handler.");
+			actualHandler = p => handler(p);
 		}
 
 		var paramSpec = paramSpecs[0];
 		Debug.Assert(typeof(TParam) == paramSpec.Type);
 
-		IValueDescriptor<TParam> descriptor = command.AddParameter<TParam>(paramSpec);
+		IValueDescriptor<TParam> descriptor = command.AddParameter(paramSpec, parseArgument);
 
 		command.SetHandler(context =>
 		{
-			var value = GetValue<TParam>(descriptor, context);
+			var value = GetValue(descriptor, context);
 			// check for null value?
-			actualHandler(value!);
+			return actualHandler(value!);
 		});
 
 		return command;
