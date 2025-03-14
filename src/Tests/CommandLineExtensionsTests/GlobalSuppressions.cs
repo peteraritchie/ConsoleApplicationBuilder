@@ -5,4 +5,5 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Maintainability", "PRm1000:XML Comments Not Present", Justification = "<Pending>", Scope = "member", Target = "~M:CommandLineExtensionsTests.CommandLineExtensionsGivenCommandWithOneArgumentShould.CorrectlyBuildCommandWithObjectHandler")]
+[assembly: SuppressMessage("Maintainability", "PRm1000:XML Comments Not Present", Justification = "<Pending>", Scope = "namespaceanddescendants", Target = "~N:CommandLineExtensionsTests")]
+[assembly: SuppressMessage("Maintainability", "PRm1010:Method Name Does Not Have Leading Transitive Verb", Justification = "<Pending>", Scope = "namespaceanddescendants", Target = "~N:CommandLineExtensionsTests")]

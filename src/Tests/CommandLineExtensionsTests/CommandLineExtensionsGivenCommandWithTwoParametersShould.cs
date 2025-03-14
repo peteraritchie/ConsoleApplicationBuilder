@@ -20,6 +20,103 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	readonly string[] args = [Constants.FileOptionName, "appsettings.json", Constants.CountOptionName, "2"];
 
 	[Fact]
+	public void BuildCommandWithLambdaHandlerAndOptionDescriptionCorrectly()
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithDescription("command description")
+			.WithOption<int?>("--x", "x coordinate option description")
+			.AddAlias("-x")
+			.WithOption<int?>("--y", "to be changed")
+			.AddAlias("-y")
+			.WithDescription("y coordinate option description")
+			.WithHandler((_, _) => { });
+
+		var command = builder.Build<RootCommand>();
+		Assert.Equal(2, command.Options.Count);
+
+		Assert.Equal("y coordinate option description", command.Options[1].Description);
+	}
+	#region option alias tests
+	[Fact]
+	public void BuildCommandWithLambdaHandlerAndOptionAliasCorrectly()
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithDescription("command description")
+			.WithOption<int?>("--x", "x coordinate option description")
+			.AddAlias("-x")
+			.WithOption<int?>("--y", "y coordinate option description")
+			.AddAlias("-y")
+			.WithHandler((_, _) => { });
+
+		var command = builder.Build<RootCommand>();
+		Assert.NotNull(command);
+	}
+
+	[Fact]
+	public void InvokeCommandWithLambdaHandlerAndOptionAliasCorrectly()
+	{
+		int? givenX = 0;
+		int? givenY = 0;
+
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithDescription("command description")
+			.WithOption<int?>("--xcoord", "x coordinate option description")
+			.AddAlias("-x")
+			.WithOption<int?>("--ycoord", "y coordinate option description")
+			.AddAlias("-y")
+			.WithHandler((x, y) =>
+			{
+				givenX = x;
+				givenY = y;
+			});
+
+		var command = builder.Build<RootCommand>();
+
+		Assert.Equal(0, command.Invoke(["-x", "1", "-y", "2"]));
+		var actualX = Assert.NotNull(givenX);
+		Assert.Equal(1, actualX);
+		var actualY = Assert.NotNull(givenY);
+		Assert.Equal(2, actualY);
+	}
+
+	[Fact]
+	public void OutputHelpWithLambdaHandlerAndOptionAliasCorrectly()
+	{
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithDescription("command description")
+			.WithOption<int?>("--xcoord", "x coordinate option description")
+			.AddAlias("-x")
+			.WithOption<int?>("--ycoord", "y coordinate option description")
+			.AddAlias("-y")
+			.WithHandler((_, _) => { });
+
+		var command = builder.Build<RootCommand>();
+
+		Assert.Equal(0, command.Invoke(["--help"], Console));
+		Assert.Equal($"""
+			Description:
+			  command description
+
+			Usage:
+			  {Utility.ExecutingTestRunnerName} [options]
+
+			Options:
+			  -x, --xcoord <xcoord>  x coordinate option description
+			  -y, --ycoord <ycoord>  y coordinate option description
+			  --version              Show version information
+			  -?, -h, --help         Show help and usage information
+
+
+
+			""", OutStringBuilder.ToString());
+	}
+	#endregion
+
+	[Fact]
 	public void BuildCommandWithLambdaHandler()
 	{
 		IConsoleApplicationBuilder builder = BuildCommandWithTwoOptions(args, (_, _) => { });
@@ -42,7 +139,6 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
-			.WithAlias("dothings")
 			.WithOption<int?>("--x", "x coordinate option description")
 			.WithOption<int?>("--y", "y coordinate option description")
 			.WithHandler((_, _) => { });
@@ -91,7 +187,6 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
-			.WithAlias("dothings")
 			.WithOption<int?>("--x", "x coordinate option description")
 			.WithOption<int?>("--y", "y coordinate option description")
 			.WithHandler((_, _) => { });
@@ -148,7 +243,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	[Fact]
 	public void HaveExpectedHelpOutputWithTwoOptionsAndLambdaHandler()
 	{
-		IConsoleApplicationBuilder builder = BuildCommandWithTwoOptions(args, (fileInfo, count) =>{});
+		IConsoleApplicationBuilder builder = BuildCommandWithTwoOptions(args, (_, _) =>{});
 
 		var outStringBuilder = new StringBuilder();
 		var errStringBuilder = new StringBuilder();
@@ -213,7 +308,6 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
-			.WithAlias("dothings")
 			.WithOption<FileInfo?>(Constants.FileOptionName, "file option description")
 			.WithOption<int?>(Constants.CountOptionName, "count option description")
 			.WithHandler(action);
@@ -291,31 +385,30 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	{
 		bool wasRootExecuted = false;
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
-			.WithAlias("alias")
 			.WithHandler(() => wasRootExecuted = true);
 
-		var command = builder.Build<NonRootCommand>();
+		var command = builder.Build<AnotherRootCommand>();
 		Assert.Equal(0, command.Invoke([]));
 		Assert.True(wasRootExecuted);
 	}
 
-	[Fact]
-	public void InvokeCommandWithAliasAndDescription()
-	{
-		bool wasRootExecuted = false;
-		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand()
-			.WithDescription("command description")
-			.WithAlias("alias")
-			.WithHandler(() => wasRootExecuted = true);
+	//[Fact]
+	//public void InvokeCommandWithAliasAndDescription()
+	//{
+	//	bool wasRootExecuted = false;
+	//	var builder = ConsoleApplication.CreateBuilder([]);
+	//	builder.Services.AddCommand()
+	//		.WithDescription("command description")
+	//		.AddAlias("alias")
+	//		.WithHandler(() => wasRootExecuted = true);
 
-		var command = builder.Build<NonRootCommand>();
-		var (_, _, console) = BuildConsoleSpy();
-		Assert.Equal(0, command.Invoke([], console));
-		Assert.False(wasRootExecuted);
-	}
+	//	var command = builder.Build<NonRootCommand>();
+	//	var (_, _, console) = BuildConsoleSpy();
+	//	Assert.Equal(0, command.Invoke([], console));
+	//	Assert.False(wasRootExecuted);
+	//}
 
 	[Fact]
 	public void InvokeCommandWithObjectHandler()
@@ -342,7 +435,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 	}
 
 	#region subcommands
-	[Fact]
+[Fact]
 	public void BuildCommandWithsSubCommandObjectHandler()
 	{
 		FileInfoCountHandlerSpy fileInfoCountHandlerSpy = new();
@@ -385,7 +478,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 			.WithOption<int?>(Constants.CountOptionName, "count option description")
 			.WithSubcommand<Subcommand>()
 			.WithDescription("a subcommand")
-			.WithAlias("subcommand")
+			.AddAlias("subcommand")
 			.WithSubcommandHandler(() => { })
 			.WithHandler((_, _) => { });
 
@@ -437,7 +530,6 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 		Assert.Equal("Action must be set before building the subcommand.", ex.Message);
 	}
 
-
 	[Fact]
 	public void InvokesCommandWithsSubCommandObjectHandler()
 	{
@@ -453,8 +545,8 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 			.WithOption<FileInfo?>(Constants.FileOptionName, "file option description")
 			.WithOption<int?>(Constants.CountOptionName, "count option description")
 			.WithSubcommand<Subcommand>()
-			.WithSubcommandHandler(() => { wasSubcommandExecuted = true; })
-			.WithHandler((_, _) => { wasRootExecuted = true; });
+			.WithSubcommandHandler(() => wasSubcommandExecuted = true)
+			.WithHandler((_, _) => wasRootExecuted = true);
 
 		var command = builder.Build<RootCommand>();
 		string[] actualArgs = ["dependencies"];
@@ -465,7 +557,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 		Assert.True(wasSubcommandExecuted);
 		Assert.False(wasRootExecuted);
 	}
-	#endregion // subcommands
+#endregion // subcommands
 
 	[Fact]
 	public void BuildParser()

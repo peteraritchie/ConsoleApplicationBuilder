@@ -20,7 +20,7 @@ public class CommandLineExtensionsWithArgumentAndArgumentParserShould
 		var command = BuildCommand(args, _ => handlerInvoked = true, (result) =>
 		{
 			parserInvoked = true;
-			return int.Parse(result.Tokens.First().Value);
+			return int.Parse(result.Tokens[0].Value);
 		});
 		Assert.NotNull(command);
 		Assert.False(handlerInvoked);
@@ -43,7 +43,7 @@ public class CommandLineExtensionsWithArgumentAndArgumentParserShould
 			result =>
 			{
 				parserInvoked = true;
-				return int.Parse(result.Tokens.First().Value);
+				return int.Parse(result.Tokens[0].Value);
 			});
 		command.Invoke(args);
 		Assert.True(handlerInvoked);
@@ -60,7 +60,7 @@ public class CommandLineExtensionsWithArgumentAndArgumentParserShould
 		var command = BuildCommand(args, _ => handlerInvoked = true, (result) =>
 		{
 			parserInvoked = true;
-			return int.Parse(result.Tokens.First().Value);
+			return int.Parse(result.Tokens[0].Value);
 		});
 		var outStringBuilder = new StringBuilder();
 		var errStringBuilder = new StringBuilder();
@@ -89,7 +89,7 @@ public class CommandLineExtensionsWithArgumentAndArgumentParserShould
 		Assert.False(parserInvoked);
 	}
 
-	private static Command BuildCommand(string[] args, Action<int> action, ParseArgument<int> argumentParser)
+	private static NullCommand BuildCommand(string[] args, Action<int> action, ParseArgument<int> argumentParser)
 	{
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand(new NullCommand())

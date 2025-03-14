@@ -6,13 +6,6 @@
 public interface ICommandConfiguration<out T>
 {
 	/// <summary>
-	/// Adds alias of name <paramref name="commandAlias"/> to the command.
-	/// </summary>
-	/// <param name="commandAlias">The command alias name.</param>
-	/// <returns></returns>
-	T WithAlias(string commandAlias);
-
-	/// <summary>
 	/// Add a description to the command.
 	/// </summary>
 	/// <param name="description">The description of the command displayed when showing help.</param>

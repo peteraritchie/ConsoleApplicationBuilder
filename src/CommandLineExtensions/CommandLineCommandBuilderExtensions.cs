@@ -9,18 +9,20 @@ namespace Pri.CommandLineExtensions;
 /// </summary>
 public static class CommandLineCommandBuilderExtensions
 {
-	public static ICommandLineCommandBuilder AddCommand(this IServiceCollection services)
+	public static ICommandBuilder AddCommand(this IServiceCollection services)
 	{
-		// TODO: check services for a RootCommand already?
-		CommandLineCommandBuilder commandLineCommandBuilder = new(services, new RootCommand());
-		return commandLineCommandBuilder;
+		if (services.Any(e => e.ServiceType == typeof(RootCommand))) throw new InvalidOperationException("RootCommand already registered in service collection.");
+
+		CommandBuilder commandBuilder = new(services, new RootCommand());
+		return commandBuilder;
 	}
 
-	public static ICommandLineCommandBuilder AddCommand<TCommand>(this IServiceCollection services) where TCommand : Command, new()
+	public static ICommandBuilder AddCommand<TCommand>(this IServiceCollection services) where TCommand : RootCommand, new()
 	{
-		// TODO: check services for a RootCommand already?
-		CommandLineCommandBuilder commandLineCommandBuilder = new(services, typeof(TCommand));
-		return commandLineCommandBuilder;
+		if (services.Any(e => e.ServiceType == typeof(TCommand))) throw new InvalidOperationException($"{typeof(TCommand).Name} already registered in service collection.");
+
+		CommandBuilder commandBuilder = new(services, typeof(TCommand));
+		return commandBuilder;
 	}
 
 	/// <summary>
@@ -32,19 +34,21 @@ public static class CommandLineCommandBuilderExtensions
 	/// <param name="services"></param>
 	/// <param name="factory"></param>
 	/// <returns></returns>
-	public static ICommandLineCommandBuilder AddCommand<TCommand>(this IServiceCollection services, Func<IServiceProvider, Command> factory)
+	public static ICommandBuilder AddCommand<TCommand>(this IServiceCollection services, Func<IServiceProvider, Command> factory)
 		where TCommand : Command
 	{
-		// TODO: check services for a RootCommand already?
-		CommandLineCommandBuilder commandLineCommandBuilder = new(services, typeof(TCommand), factory);
-		return commandLineCommandBuilder;
+		if (services.Any(e => e.ServiceType == typeof(TCommand))) throw new InvalidOperationException($"{typeof(TCommand).Name} already registered in service collection.");
+
+		CommandBuilder commandBuilder = new(services, typeof(TCommand), factory);
+		return commandBuilder;
 	}
 
-	public static ICommandLineCommandBuilder AddCommand<TCommand>(this IServiceCollection services, TCommand command)
+	public static ICommandBuilder AddCommand<TCommand>(this IServiceCollection services, TCommand command)
 		where TCommand : Command, new()
 	{
-		// TODO: check services for a RootCommand already?
-		CommandLineCommandBuilder commandLineCommandBuilder = new(services, command);
-		return commandLineCommandBuilder;
+		if (services.Any(e => e.ServiceType == typeof(TCommand))) throw new InvalidOperationException($"{typeof(TCommand).Name} already registered in service collection.");
+
+		CommandBuilder commandBuilder = new(services, command);
+		return commandBuilder;
 	}
 }

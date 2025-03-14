@@ -13,7 +13,6 @@ public class AsyncTests : CommandLineBuilderTestingBase
 	public async Task InvokeAsync()
 	{
 		string[] args = [];
-		int exitCode;
 		bool lambdaWasInvoked = false;
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand<FakeCommand>()
@@ -23,7 +22,7 @@ public class AsyncTests : CommandLineBuilderTestingBase
 				lambdaWasInvoked = true;
 			});
 		var command = builder.Build<FakeCommand>();
-		exitCode = await command.InvokeAsync(args);
+		int exitCode = await command.InvokeAsync(args);
 		Assert.True(lambdaWasInvoked);
 		Assert.Equal(0, exitCode);
 	}
@@ -43,7 +42,6 @@ public class AsyncTests : CommandLineBuilderTestingBase
 	public async Task InvokeAsyncWithOneParameter()
 	{
 		string[] args = ["--count", "2"];
-		int exitCode;
 		bool lambdaWasInvoked = false;
 		int actualParameter = 0;
 		var builder = ConsoleApplication.CreateBuilder(args);
@@ -56,7 +54,7 @@ public class AsyncTests : CommandLineBuilderTestingBase
 				lambdaWasInvoked = true;
 			});
 		var command = builder.Build<FakeCommand>();
-		exitCode = await command.InvokeAsync(args);
+		int exitCode = await command.InvokeAsync(args);
 		Assert.True(lambdaWasInvoked);
 		Assert.Equal(2, actualParameter);
 		Assert.Equal(0, exitCode);
@@ -78,7 +76,6 @@ public class AsyncTests : CommandLineBuilderTestingBase
 	public async Task InvokeAsyncWithTwoParameters()
 	{
 		string[] args = ["--x", "2", "--y", "3"];
-		int exitCode;
 		bool lambdaWasInvoked = false;
 		int actualX = 0;
 		int actualY = 0;
@@ -94,7 +91,7 @@ public class AsyncTests : CommandLineBuilderTestingBase
 				lambdaWasInvoked = true;
 			});
 		var command = builder.Build<FakeCommand>();
-		exitCode = await command.InvokeAsync(args);
+		int exitCode = await command.InvokeAsync(args);
 		Assert.True(lambdaWasInvoked);
 		Assert.Equal(2, actualX);
 		Assert.Equal(3, actualY);

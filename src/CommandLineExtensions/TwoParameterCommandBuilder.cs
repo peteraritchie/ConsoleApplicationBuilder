@@ -1,73 +1,102 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Parsing;
+#if PARANOID
 using System.Diagnostics;
+#endif
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Pri.CommandLineExtensions;
 
-//public static class OptionsExtensions
-//{
-//	public static CommandLineCommandBuilder<T> WithOption<T>(this CommandLineCommandBuilder builder, string name, string description)
-//	{
-//		CommandLineCommandBuilder <T> newBuilder = new(builder);
-//		newBuilder.optionSpecs.Add(new OptionSpec { Name = name, Description = description, Type = typeof(T) });
-//		return newBuilder;
-//	}
-//}
-
 /// <summary>
 /// terminal builder, if we add more this will have to check `action` in `AddOption`
 /// </summary>
-internal class TwoParameterCommandLineCommandBuilder<TParam1, TParam2>
-	: CommandLineCommandBuilderBase, ITwoParameterCommandLineCommandBuilder<TParam1, TParam2>
+internal class TwoParameterCommandBuilder<TParam1, TParam2>
+	: CommandBuilderBase, ITwoParameterCommandBuilder<TParam1, TParam2>
 {
 	private Func<TParam1, TParam2, Task>? handler;
+	private ParseArgument<TParam2>? parseArgument;
 
 	/// <summary>
 	/// terminal builder, if we add more this will have to check `action` in `AddOption`
 	/// </summary>
-	public TwoParameterCommandLineCommandBuilder(CommandLineCommandBuilderBase commandLineCommandBuilder) : base(commandLineCommandBuilder)
+	private TwoParameterCommandBuilder(CommandBuilderBase commandBuilder) : base(commandBuilder)
 	{
-		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
+	}
+
+	public TwoParameterCommandBuilder(CommandBuilderBase initiator, ParamSpec paramSpec) : this(initiator)
+	{
+		ParamSpecs.Add(paramSpec);
+	}
+
+	/// <inheritsdoc />
+	public ITwoParameterCommandBuilder<TParam1, TParam2> AddAlias(string alias)
+	{
+		ParamSpecs.Last().Aliases.Add(alias);
+		return this;
+	}
+
+	/// <inheritsdoc />
+	public ITwoParameterCommandBuilder<TParam1, TParam2> WithArgumentParser(ParseArgument<TParam2> argumentParser)
+	{
+		parseArgument = argumentParser;
+		return this;
+	}
+
+	/// <inheritsdoc />
+	public ITwoParameterCommandBuilder<TParam1, TParam2> WithDefault(TParam2 defaultValue)
+	{
+		ParamSpecs.Last().DefaultValue = defaultValue;
+		return this;
+	}
+
+	/// <inheritsdoc />
+	public ITwoParameterCommandBuilder<TParam1, TParam2> WithDescription(string parameterDescription)
+	{
+		ParamSpecs.Last().Description = parameterDescription;
+
+		return this;
 	}
 
 	// TODO: WithOption... when ThreeParameterCommandLineCommandBuilder is done
 	// TODO: WithRequiredOption... when ThreeParameterCommandLineCommandBuilder is done
 	// TODO: WithArgument... when ThreeParameterCommandLineCommandBuilder is done
 
-	public ITwoParameterCommandLineCommandSubcommandBuilder<TParam1, TParam2, TSubcommand> WithSubcommand<TSubcommand>() where TSubcommand : Command, new()
+	/// <inheritsdoc />
+	public ISubcommandBuilder<TSubcommand, ITwoParameterCommandBuilder<TParam1, TParam2>> WithSubcommand<TSubcommand>()
+		where TSubcommand : Command, new()
 	{
+#if PARANOID
 		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
-#if UNREACHABLE
-		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a subcommand without a command.");
 #endif
-
 		subcommands.Add(typeof(TSubcommand));
 
-		return new TwoParameterCommandLineCommandSubcommandBuilder<TParam1, TParam2, TSubcommand>(this, serviceCollection); // ?
+		return new SubcommandBuilder<TSubcommand, ITwoParameterCommandBuilder<TParam1, TParam2>>(this);
 	}
 
 	/// <inheritsdoc />
 	public IServiceCollection WithHandler<THandler>() where THandler : class, ICommandHandler<TParam1, TParam2>
 	{
+#if PARANOID
 		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
-#if UNREACHABLE
 		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
 #endif
 
 		commandHandlerType = typeof(THandler);
 
-		serviceCollection.TryAddSingleton<ICommandHandler<TParam1, TParam2>, THandler>();
+		Services.TryAddSingleton<ICommandHandler<TParam1, TParam2>, THandler>(); // TryAdd in case they've already added something prior...
 
-		return serviceCollection; // builder terminal
+		Services.Replace(ServiceDescriptor.Singleton(GetCommandType(), BuildCommand));
+
+		return Services; // builder terminal
 	}
 
 	/// <inheritsdoc />
 	public IServiceCollection WithHandler(Action<TParam1, TParam2> action)
 	{
+#if PARANOID
 		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
-#if UNREACHABLE
 		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
 #endif
 		handler = action switch
@@ -80,17 +109,17 @@ internal class TwoParameterCommandLineCommandBuilder<TParam1, TParam2>
 			}
 		};
 
-		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
+		Services.Replace(ServiceDescriptor.Singleton(GetCommandType(), BuildCommand));
 
-		return serviceCollection; // builder terminal
+		return Services; // builder terminal
 	}
 
 	/// <inheritsdoc />
 	public IServiceCollection WithHandler(Func<TParam1, TParam2, int> func)
 	{
+#if PARANOID
 		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
 		Debug.Assert(handler is null);
-#if UNREACHABLE
 		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
 		if (handler is not null) throw new InvalidOperationException("Cannot add a handler twice.");
 #endif
@@ -100,17 +129,18 @@ internal class TwoParameterCommandLineCommandBuilder<TParam1, TParam2>
 			null => null,
 			_ => (p1,p2) => Task.FromResult(func(p1,p2))
 		};
-		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
 
-		return serviceCollection; // builder terminal
+		Services.Replace(ServiceDescriptor.Singleton(GetCommandType(), BuildCommand));
+
+		return Services; // builder terminal
 	}
 
 	/// <inheritsdoc />
 	public IServiceCollection WithHandler(Func<TParam1, TParam2, Task> func)
 	{
+#if PARANOID
 		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
 		Debug.Assert(handler is null);
-#if UNREACHABLE
 		if (Command is null || CommandType is null) throw new InvalidOperationException("Cannot add a handler without a command.");
 		if (handler is not null) throw new InvalidOperationException("Cannot add a handler twice.");
 #endif
@@ -120,21 +150,24 @@ internal class TwoParameterCommandLineCommandBuilder<TParam1, TParam2>
 			null => null,
 			_ => async (p1, p2) => await func(p1, p2)
 		};
-		serviceCollection.AddSingleton(GetCommandType(), BuildCommand);
 
-		return serviceCollection; // builder terminal
+		Services.Replace(ServiceDescriptor.Singleton(GetCommandType(), BuildCommand));
+
+		return Services; // builder terminal
 	}
+
 	private Command BuildCommand(IServiceProvider provider)
 	{
+#if PARANOID
 		Debug.Assert(Command != null || CommandType != null || (CommandFactory != null && CommandType != null));
-		Command command = GetCommand(provider);
-
-#if UNREACHABLE
 		if (Command is null || CommandType is null) throw new InvalidOperationException("No command to use when building the command.");
 #endif
+		Command command = GetCommand(provider);
 
-		if (CommandDescription is not null) command.Description = CommandDescription;
-		if (CommandAlias is not null) command.AddAlias(CommandAlias);
+		if (CommandDescription is not null)
+		{
+			command.Description = CommandDescription;
+		}
 
 		if (subcommands.Any())
 		{
@@ -149,11 +182,7 @@ internal class TwoParameterCommandLineCommandBuilder<TParam1, TParam2>
 		{
 			// get a handler object with all the dependencies resolved and injected
 			var commandHandler = provider.GetRequiredService<ICommandHandler<TParam1, TParam2>>();
-			actualHandler = (value1, value2) =>
-			{
-				commandHandler.Execute(value1, value2);
-				return Task.FromResult(0);
-			};
+			actualHandler = (value1, value2) => Task.FromResult(commandHandler.Execute(value1, value2));
 		}
 		else
 		{
@@ -161,11 +190,8 @@ internal class TwoParameterCommandLineCommandBuilder<TParam1, TParam2>
 			                throw new InvalidOperationException("Cannot build a command without a handler.");
 		}
 
-		Debug.Assert(typeof(TParam1) == paramSpecs[0].Type);
-		Debug.Assert(typeof(TParam2) == paramSpecs[1].Type);
-
-		var descriptor1 = command.AddParameter<TParam1>(paramSpecs[0]);
-		var descriptor2 = command.AddParameter<TParam2>(paramSpecs[1]);
+		var descriptor1 = command.AddParameter<TParam1>(ParamSpecs[0]);
+		var descriptor2 = command.AddParameter<TParam2>(ParamSpecs[1], parseArgument);
 
 		command.SetHandler(context =>
 		{

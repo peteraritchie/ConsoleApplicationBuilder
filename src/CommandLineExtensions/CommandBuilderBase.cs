@@ -9,42 +9,49 @@ namespace Pri.CommandLineExtensions;
 /// <summary>
 /// A base class for command line command builder class that contain members common to all command line command builders.
 /// </summary>
-/// <param name="services"></param>
-internal class CommandLineCommandBuilderBase(IServiceCollection services)
+internal abstract class CommandBuilderBase : IBuilderState
 {
-	protected readonly IServiceCollection serviceCollection = services;
-	protected readonly List<ParamSpec> paramSpecs = [];
+	public IServiceCollection Services { get; }
+	public List<ParamSpec> ParamSpecs { get; } = [];
+	public string? CommandDescription { get; set; }
+	public Command? Command { get; init; }
+	public Type? CommandType { get; init; }
+	protected Func<IServiceProvider, Command>? CommandFactory { get; init; }
 	protected Type? commandHandlerType;
 	protected readonly List<Type> subcommands = [];
 
-	protected CommandLineCommandBuilderBase(CommandLineCommandBuilderBase commandLineCommandBuilder)
-		: this(commandLineCommandBuilder.serviceCollection,
-			commandLineCommandBuilder.CommandDescription,
-			commandLineCommandBuilder.CommandAlias,
-			commandLineCommandBuilder.Command,
-			commandLineCommandBuilder.CommandType,
-			commandLineCommandBuilder.paramSpecs)
+	protected CommandBuilderBase(CommandBuilderBase initiator)
+		: this(initiator.Services,
+			initiator.CommandDescription,
+			initiator.Command,
+			initiator.CommandType,
+			initiator.ParamSpecs)
 	{
 	}
 
-	private CommandLineCommandBuilderBase(IServiceCollection services, string? commandDescription, string? commandAlias, Command? command, Type? commandType, List<ParamSpec> paramSpecs) : this(services)
+	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage(Justification = "YAGNI?")]
+	protected CommandBuilderBase(ICommandBuilder initiator)
+		: this((CommandBuilderBase)initiator)
+	{
+	}
+
+	private CommandBuilderBase(IServiceCollection services, string? commandDescription, Command? command,
+		Type? commandType, List<ParamSpec> paramSpecs) : this(services)
 	{
 		CommandDescription = commandDescription;
-		CommandAlias = commandAlias;
 		Command = command;
 		CommandType = commandType;
-		this.paramSpecs = paramSpecs;
+		this.ParamSpecs = paramSpecs;
 	}
 
-	protected string? CommandDescription { get; set; }
-
-	protected string? CommandAlias { get; set; }
-
-	protected Command? Command { get; init; } // ?
-
-	protected Type? CommandType { get; init; }
-
-	protected Func<IServiceProvider, Command>? CommandFactory { get; init; }
+	/// <summary>
+	/// A base class for command line command builder class that contain members common to all command line command builders.
+	/// </summary>
+	/// <param name="services"></param>
+	protected CommandBuilderBase(IServiceCollection services)
+	{
+		Services = services;
+	}
 
 	[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage(Justification =
 		"Lifted from System.CommandLine, assuming a high level of quality")]

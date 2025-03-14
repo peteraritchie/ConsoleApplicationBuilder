@@ -14,31 +14,17 @@ namespace CommandLineExtensionsTests;
 public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 {
 	[Fact]
-	public void CorrectlyBuildParserWithLambdaHandler()
+	public void BuildParserWithLambdaHandlerCorrectly()
 	{
 		string[] args = [];
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
-			.WithAlias("alias")
 			.WithHandler(() => { });
 
 		var parser = builder.Build<Parser>();
 		Assert.NotNull(parser);
 		Assert.NotNull(parser.Configuration.RootCommand);
-	}
-
-	[Fact]
-	public void SetAliasCorrectly()
-	{
-		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand()
-			.WithDescription("command description")
-			.WithAlias("alias")
-			.WithHandler(() => { });
-
-		var command = builder.Build<RootCommand>();
-		Assert.Contains("alias", command.Aliases);
 	}
 
 	[Fact]
@@ -95,7 +81,6 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 		var builder = ConsoleApplication.CreateBuilder([]);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
-			.WithAlias("alias")
 			.WithHandler(() => { });
 
 		var command = builder.Build<RootCommand>();
@@ -119,7 +104,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 	}
 
 	[Fact]
-	public void CorrectlyBuildCommandWithLambdaHandler()
+	public void BuildCommandWithLambdaHandlerCorrectly()
 	{
 		string[] args = [];
 
@@ -134,7 +119,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 	}
 
 	[Fact]
-	public void CorrectlyInvokeCommandWithLambdaHandler()
+	public void InvokeCommandWithLambdaHandlerCorrectly()
 	{
 		string[] args = [];
 
@@ -150,7 +135,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 	}
 
 	[Fact]
-	public void CorrectlyBuildCommandWithObjectHandler()
+	public void BuildCommandWithObjectHandlerCorrectly()
 	{
 		string[] args = [];
 
@@ -165,7 +150,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 	}
 
 	[Fact]
-	public void CorrectlyInvokeCommandWithObjectHandler()
+	public void InvokeCommandWithObjectHandlerCorrectly()
 	{
 		string[] args = [];
 		HandlerSpy handlerSpy = new();

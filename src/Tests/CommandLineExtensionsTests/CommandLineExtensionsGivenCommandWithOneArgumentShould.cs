@@ -161,10 +161,9 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 		string[] args = ["appsettings.json"];
 		FileInfoHandlerSpy fileInfoHandlerSpy = new();
 		bool dependenciesSubcommandExecuted = false;
-		var command = BuildCommandWithSubcommand(args, p => fileInfoHandlerSpy.Execute(p), () =>
-		{
-			dependenciesSubcommandExecuted = true;
-		});
+		var command = BuildCommandWithSubcommand(args,
+			p => fileInfoHandlerSpy.Execute(p),
+			() => dependenciesSubcommandExecuted = true);
 
 		var outStringBuilder = new StringBuilder();
 		var errStringBuilder = new StringBuilder();
@@ -186,7 +185,7 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 			.WithArgument<FileInfo?>(Constants.FileArgumentName, "file argument description")
 			.WithSubcommand<Subcommand>()
 			.WithDescription("Analyze dependencies")
-			.WithAlias("d")
+			.AddAlias("d")
 			.WithSubcommandHandler(null!)
 			.WithHandler(_ => { });
 
@@ -249,7 +248,6 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 		builder.Services.AddSingleton<ICommandHandler<FileInfo?>>(_ => fileInfoHandlerSpy);
 		builder.Services.AddCommand()
 			.WithDescription("command description")
-			.WithAlias("commandAlias")
 			.WithArgument<FileInfo?>(Constants.FileArgumentName, "file option description")
 			.WithHandler<FileInfoHandlerSpy>();
 		return builder;
@@ -274,7 +272,7 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 			.WithArgument<FileInfo?>(Constants.FileArgumentName, "file argument description")
 			.WithSubcommand<Subcommand>()
 			.WithDescription("Analyze dependencies")
-			.WithAlias("d")
+			.AddAlias("d")
 			.WithSubcommandHandler(action)
 			.WithHandler(fileAction);
 

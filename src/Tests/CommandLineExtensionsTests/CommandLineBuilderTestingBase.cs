@@ -14,7 +14,7 @@ public class CommandLineBuilderTestingBase
 		(OutStringBuilder, ErrStringBuilder, Console) = BuildConsoleSpy();
 	}
 
-	protected (StringBuilder outStringBuilder, StringBuilder errStringBuilder, IConsole console) BuildConsoleSpy()
+	protected static (StringBuilder outStringBuilder, StringBuilder errStringBuilder, IConsole console) BuildConsoleSpy()
 	{
 		var outStringBuilder = new StringBuilder();
 		var errStringBuilder = new StringBuilder();

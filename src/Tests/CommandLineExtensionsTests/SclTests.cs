@@ -12,9 +12,7 @@ public class SclTests
 		rootCommand.AddOption(new Option<string>("--option", "Option description") { IsRequired = true});
 		rootCommand.AddArgument(new Argument<string>("argument", "Argument description"));
 		bool wasExecuted = false;
-		rootCommand.SetHandler(_ => {
-			wasExecuted = true;
-		});
+		rootCommand.SetHandler(_ => wasExecuted = true);
 		var r = rootCommand.Parse(args);
 		Assert.Empty(r.Errors);
 		var r2 = rootCommand.Invoke(args);

@@ -74,7 +74,6 @@ public class CreatingMinimalApplicationInstanceShould
 		{
 			var builder = ConsoleApplication.CreateBuilder([]);
 			Assert.EndsWith("..", builder.Environment.ContentRootPath);
-			var o = builder.Build<Program>();
 		}
 		finally
 		{
@@ -90,7 +89,6 @@ public class CreatingMinimalApplicationInstanceShould
 		{
 			var builder = ConsoleApplication.CreateBuilder([]);
 			Assert.Equal("/", builder.Environment.ContentRootPath);
-			var o = builder.Build<Program>();
 		}
 		finally
 		{
@@ -141,10 +139,8 @@ public class CreatingMinimalApplicationInstanceShould
 		{
 			var builder = ConsoleApplication.CreateBuilder([]);
 			var o = builder.Build<Program>();
-			if (o.Configuration is ConfigurationManager r)
-			{
-				var s = r.Sources;
-			}
+			var configurationManager = Assert.IsType<ConfigurationManager>(o.Configuration);
+			Assert.NotNull(configurationManager.Sources);
 		}
 		finally
 		{

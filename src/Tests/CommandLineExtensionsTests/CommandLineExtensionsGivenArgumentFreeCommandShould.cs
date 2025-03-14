@@ -10,18 +10,7 @@ namespace CommandLineExtensionsTests;
 
 public class CommandLineExtensionsGivenArgumentFreeCommandShould
 {
-	[Fact]
-	public void SetAliasCorrectly()
-	{
-		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
-			.WithDescription("command description")
-			.WithAlias("alias")
-			.WithHandler(() => { });
-
-		var command = builder.Build<NonRootCommand>();
-		Assert.Contains("alias", command.Aliases);
-	}
+	public class AnotherRootCommand() : RootCommand("Analyze something.");
 
 	[Fact]
 	public void HaveExpectedHelpOutput()
@@ -31,19 +20,19 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
 
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
 			.WithHandler(() => { });
 
-		var command = builder.Build<NonRootCommand>();
+		var command = builder.Build<AnotherRootCommand>();
 		command.Invoke("--help", console);
 
-		Assert.Equal("""
+		Assert.Equal($"""
 		             Description:
 		               command description
 
 		             Usage:
-		               analyze [options]
+		               {Utility.ExecutingTestRunnerName} [options]
 
 		             Options:
 		               --version       Show version information
@@ -58,24 +47,19 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 	[Fact]
 	public void CorrectlySetSubcommandAlias()
 	{
-		var outStringBuilder = new StringBuilder();
-		var errStringBuilder = new StringBuilder();
-		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
-
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
 			.WithSubcommand<Subcommand>()
-			.WithAlias("subcommandAlias")
+			.AddAlias("subcommandAlias")
 			.WithDescription("Analyze the dependencies.")
 			.WithSubcommandHandler(() => { })
 			.WithHandler(() => { });
 
-		var command = builder.Build<NonRootCommand>();
+		var command = builder.Build<AnotherRootCommand>();
 		var subcommand = Assert.Single(command.Subcommands);
 		Assert.Equal(2, subcommand.Aliases.Count);
 		Assert.Contains("subcommandAlias", subcommand.Aliases);
-		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
 	[Fact]
@@ -85,13 +69,13 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		bool wasRootExecuted = false;
 
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
 			.WithSubcommand<Subcommand>()
 			.WithSubcommandHandler(() => wasSubcommandExecuted = true)
 			.WithHandler(() => wasRootExecuted = true);
 
-		var command = builder.Build<NonRootCommand>();
+		var command = builder.Build<AnotherRootCommand>();
 		Assert.Equal(0, command.Invoke(["dependencies"]));
 		Assert.True(wasSubcommandExecuted);
 		Assert.False(wasRootExecuted);
@@ -101,13 +85,13 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 	public void CorrectlyThrowsWithNullSubcommandHandler()
 	{
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
 			.WithSubcommand<Subcommand>()
 			.WithSubcommandHandler(null!)
 			.WithHandler(() => { });
 
-		var ex = Assert.Throws<InvalidOperationException>(builder.Build<NonRootCommand>);
+		var ex = Assert.Throws<InvalidOperationException>(builder.Build<AnotherRootCommand>);
 		Assert.Equal("Action must be set before building the subcommand.", ex.Message);
 	}
 
@@ -115,12 +99,12 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 	public void CorrectlyThrowsWithNullCommandHandler()
 	{
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
 			.WithSubcommand<Subcommand>()
 			.WithSubcommandHandler(()=>{ }).WithHandler((Action)null!);
 
-		var ex = Assert.Throws<InvalidOperationException>(builder.Build<NonRootCommand>);
+		var ex = Assert.Throws<InvalidOperationException>(builder.Build<AnotherRootCommand>);
 		Assert.Equal("Cannot build a command without a handler.", ex.Message);
 	}
 
@@ -130,16 +114,16 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		bool wasSubcommandExecuted = false;
 		bool wasRootExecuted = false;
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
 			.WithSubcommand<Subcommand>()
-			.WithAlias("subcommandAlias")
+			.AddAlias("subcommandAlias")
 			.WithDescription("Analyze the dependencies.")
 			.WithSubcommandHandler(() => wasSubcommandExecuted = true)
 			.WithHandler(() => wasRootExecuted = true);
 
-		var command = builder.Build<NonRootCommand>();
-		Assert.Equal(0, command.Invoke(["analyze", "dependencies"]));
+		var command = builder.Build<AnotherRootCommand>();
+		Assert.Equal(0, command.Invoke(["dependencies"]));
 		Assert.True(wasSubcommandExecuted);
 		Assert.False(wasRootExecuted);
 	}
@@ -152,22 +136,22 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
 
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
 			.WithSubcommand<Subcommand>()
 			.WithDescription("Analyze the dependencies.")
 			.WithSubcommandHandler(() => { })
 			.WithHandler(() => { });
 
-		var command = builder.Build<NonRootCommand>();
+		var command = builder.Build<AnotherRootCommand>();
 		command.Invoke("--help", console);
 
-		Assert.Equal("""
+		Assert.Equal($"""
 		             Description:
 		               command description
 
 		             Usage:
-		               analyze [command] [options]
+		               {Utility.ExecutingTestRunnerName} [command] [options]
 
 		             Options:
 		               --version       Show version information
@@ -189,23 +173,23 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		IConsole console = Utility.CreateConsoleSpy(outStringBuilder, errStringBuilder);
 
 		var builder = ConsoleApplication.CreateBuilder([]);
-		builder.Services.AddCommand<NonRootCommand>()
+		builder.Services.AddCommand<AnotherRootCommand>()
 			.WithDescription("command description")
 			.WithSubcommand<Subcommand>()
-			.WithAlias("subcommandAlias")
+			.AddAlias("subcommandAlias")
 			.WithDescription("Analyze the dependencies.")
 			.WithSubcommandHandler(() => { })
 			.WithHandler(() => { });
 
-		var command = builder.Build<NonRootCommand>();
+		var command = builder.Build<AnotherRootCommand>();
 		command.Invoke("--help", console);
 
-		Assert.Equal("""
+		Assert.Equal($"""
 		             Description:
 		               command description
 
 		             Usage:
-		               analyze [command] [options]
+		               {Utility.ExecutingTestRunnerName} [command] [options]
 
 		             Options:
 		               --version       Show version information
@@ -218,6 +202,4 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		             """, outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
-
-	public class NonRootCommand() : Command("analyze", "Analyze something.");
 }

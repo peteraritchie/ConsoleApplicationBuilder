@@ -30,7 +30,7 @@ variables:
   projects: 'src/CommandLineExtensions/*.csproj'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
-  nugetServiceConnection: 'Nuget - PRI.CommandLineExtensions' # 'TestNuGet - PRI-CommandLineExtensions'
+  nugetServiceConnection: 'TestNuGet - PRI-CommandLineExtensions' # 'Nuget - PRI.CommandLineExtensions'
   testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   ${{ if eq(parameters.verbosity, 'Quiet') }}:
     dotnetVerbosity: q # Quiet

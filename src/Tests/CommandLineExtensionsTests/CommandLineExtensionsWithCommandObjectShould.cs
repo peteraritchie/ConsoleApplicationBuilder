@@ -3,6 +3,10 @@ using System.Text;
 
 using CommandLineExtensionsTests.TestDoubles;
 
+using Microsoft.Extensions.DependencyInjection;
+
+using NSubstitute;
+
 using Pri.CommandLineExtensions;
 using Pri.ConsoleApplicationBuilder;
 
@@ -59,11 +63,48 @@ public class CommandLineExtensionsWithCommandObjectShould
 		Assert.False(handlerInvoked);
 	}
 
-	private static Command BuildCommand(string[] args, Action action)
+	[Fact]
+	public void ThrowWhenNewRootCommandRegisteredTwice()
+	{
+		var builder = ConsoleApplication.CreateBuilder([]);
+		builder.Services.AddSingleton<AnotherRootCommand>();
+		var ex = Assert.Throws<InvalidOperationException>(()=>builder.Services.AddCommand(new AnotherRootCommand()));
+		Assert.Equal("AnotherRootCommand already registered in service collection.", ex.Message);
+	}
+
+	[Fact]
+	public void ThrowWhenImpliedRootCommandRegisteredTwice()
+	{
+		var builder = ConsoleApplication.CreateBuilder([]);
+		builder.Services.AddSingleton<RootCommand>();
+		var ex = Assert.Throws<InvalidOperationException>(builder.Services.AddCommand);
+		Assert.Equal("RootCommand already registered in service collection.", ex.Message);
+	}
+
+	[Fact]
+	public void ThrowWhenTypedRootCommandRegisteredTwice()
+	{
+		var builder = ConsoleApplication.CreateBuilder([]);
+		builder.Services.AddSingleton<AnotherRootCommand>();
+		var ex = Assert.Throws<InvalidOperationException>(() => builder.Services.AddCommand<AnotherRootCommand>());
+		Assert.Equal("AnotherRootCommand already registered in service collection.", ex.Message);
+	}
+
+	[Fact]
+	public void ThrowWhenFactoryRootCommandRegisteredTwice()
+	{
+		var builder = ConsoleApplication.CreateBuilder([]);
+		builder.Services.AddSingleton<AnotherRootCommand>();
+		var ex = Assert.Throws<InvalidOperationException>(() => builder.Services.AddCommand<AnotherRootCommand>(_=>new AnotherRootCommand()));
+		Assert.Equal("AnotherRootCommand already registered in service collection.", ex.Message);
+	}
+
+	private static NullCommand BuildCommand(string[] args, Action action)
 	{
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand(new NullCommand())
 			.WithHandler(action);
 		return builder.Build<NullCommand>();
 	}
+	public class AnotherRootCommand : RootCommand { }
 }

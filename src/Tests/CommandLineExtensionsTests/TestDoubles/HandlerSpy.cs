@@ -5,8 +5,9 @@ namespace CommandLineExtensionsTests.TestDoubles;
 public class HandlerSpy : ICommandHandler
 {
 	internal bool WasExecuted { get; private set; }
-	public void Execute()
+	public int Execute()
 	{
 		WasExecuted = true;
+		return 0;
 	}
 }

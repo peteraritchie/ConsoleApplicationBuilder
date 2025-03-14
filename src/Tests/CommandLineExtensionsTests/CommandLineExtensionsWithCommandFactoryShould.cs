@@ -86,7 +86,8 @@ public class CommandLineExtensionsWithCommandFactoryShould
 		Assert.True(lambdaInvoked);
 		Assert.False(handlerInvoked);
 	}
-	private static Command BuildCommand(string[] args, Func<IServiceProvider, Command> factory, Action action)
+
+	private static MainRootCommand BuildCommand(string[] args, Func<IServiceProvider, Command> factory, Action action)
 	{
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand<MainRootCommand>(factory)

@@ -2,17 +2,17 @@
 
 public interface ICommandHandler
 {
-	void Execute();
+	int Execute();
 }
 
 public interface ICommandHandler<in TParam>
 {
-	void Execute(TParam paramValue);
+	int Execute(TParam paramValue);
 }
 
 public interface ICommandHandler<in TParam1, in TParam2>
 {
-	void Execute(TParam1 paramValue, TParam2 param2Value);
+	int Execute(TParam1 param1Value, TParam2 param2Value);
 }
 
 //public class GenericCommandHandler : ICommandHandler
