@@ -7,7 +7,7 @@ pool:
 variables:
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
-  testProjects: 'src/ConsoleApplicationBuilder/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
+  testProjects: 'src/Tests/ConsoleApplicationBuilderTests/ConsoleApplicationBuilderTests.csproj'
 
 stages:
 - stage: build_test
