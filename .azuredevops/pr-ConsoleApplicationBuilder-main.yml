@@ -8,8 +8,7 @@ variables:
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
   testProjects: |
-      src/Tests/ConsoleApplicationBuilderTests/ConsoleApplicationBuilderTests.csproj
-      src/Tests/CommandLineExtensionsTests/CommandLineExtensionsTests.csproj
+      src/Tests/**/*Tests.csproj
 
 stages:
 - stage: build_test
