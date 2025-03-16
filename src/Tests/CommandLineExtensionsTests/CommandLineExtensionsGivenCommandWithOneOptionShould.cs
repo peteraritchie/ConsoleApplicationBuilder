@@ -91,7 +91,7 @@ public class CommandLineExtensionsGivenCommandWithOneOptionShould : CommandLineB
 
 
 
-			""", OutStringBuilder.ToString());
+			""".ReplaceLineEndings(), OutStringBuilder.ToString());
 		Assert.False(itRan);
 		Assert.Null(givenFileInfo);
 	}
@@ -229,7 +229,7 @@ public class CommandLineExtensionsGivenCommandWithOneOptionShould : CommandLineB
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 
 	}
 

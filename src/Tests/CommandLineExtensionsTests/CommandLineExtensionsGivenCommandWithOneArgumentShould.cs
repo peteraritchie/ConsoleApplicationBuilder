@@ -74,7 +74,7 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
@@ -124,7 +124,7 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
@@ -225,7 +225,7 @@ public class CommandLineExtensionsGivenCommandWithOneArgumentShould : CommandLin
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 

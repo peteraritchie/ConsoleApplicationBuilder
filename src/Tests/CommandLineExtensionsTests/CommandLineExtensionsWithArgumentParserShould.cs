@@ -80,7 +80,7 @@ public class CommandLineExtensionsWithOptionAndArgumentParserShould
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 		Assert.False(handlerInvoked);
 		Assert.False(parserInvoked);

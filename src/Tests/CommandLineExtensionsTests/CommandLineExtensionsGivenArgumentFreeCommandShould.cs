@@ -40,7 +40,7 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 
 
 
-		             """, outStringBuilder.ToString());
+		             """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
@@ -161,7 +161,7 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		               dependencies  Analyze the dependencies.
 
 
-		             """, outStringBuilder.ToString());
+		             """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
@@ -199,7 +199,7 @@ public class CommandLineExtensionsGivenArgumentFreeCommandShould
 		               dependencies, subcommandAlias  Analyze the dependencies.
 
 
-		             """, outStringBuilder.ToString());
+		             """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 }

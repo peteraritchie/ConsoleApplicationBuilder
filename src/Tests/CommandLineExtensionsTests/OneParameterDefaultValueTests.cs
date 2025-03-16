@@ -34,7 +34,7 @@ public class OneParameterDefaultValueTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 
 	}
 

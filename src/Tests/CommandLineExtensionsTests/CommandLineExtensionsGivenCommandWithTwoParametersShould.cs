@@ -112,7 +112,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 
 
 
-			""", OutStringBuilder.ToString());
+			""".ReplaceLineEndings(), OutStringBuilder.ToString());
 	}
 	#endregion
 
@@ -213,7 +213,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
@@ -267,7 +267,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
@@ -506,7 +506,7 @@ public class CommandLineExtensionsGivenCommandWithTwoParametersShould
 		                dependencies, subcommand  a subcommand
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 

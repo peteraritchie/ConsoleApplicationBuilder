@@ -58,7 +58,7 @@ public class CommandLineExtensionsWithCommandObjectShould
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 		Assert.False(handlerInvoked);
 	}

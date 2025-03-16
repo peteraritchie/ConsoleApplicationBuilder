@@ -81,7 +81,7 @@ public class CommandLineExtensionsWithCommandFactoryShould
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 		Assert.True(lambdaInvoked);
 		Assert.False(handlerInvoked);

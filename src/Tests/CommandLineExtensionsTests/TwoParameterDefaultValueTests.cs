@@ -36,7 +36,7 @@ public class TwoParameterDefaultValueTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 
 	}
 

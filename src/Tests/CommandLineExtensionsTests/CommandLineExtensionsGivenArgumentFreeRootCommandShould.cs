@@ -67,7 +67,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 
@@ -99,7 +99,7 @@ public class CommandLineExtensionsGivenArgumentFreeRootCommandShould
 
 
 
-		              """, outStringBuilder.ToString());
+		              """.ReplaceLineEndings(), outStringBuilder.ToString());
 		Assert.Equal(string.Empty, errStringBuilder.ToString());
 	}
 

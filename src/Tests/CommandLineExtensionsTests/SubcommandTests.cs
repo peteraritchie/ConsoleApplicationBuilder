@@ -54,7 +54,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -291,7 +291,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-					""", OutStringBuilder.ToString());
+					""".ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -504,7 +504,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-					""", OutStringBuilder.ToString());
+					""".ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -700,7 +700,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -907,7 +907,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -1116,7 +1116,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -1228,7 +1228,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 					Subcommand handler received reference: 'project-reference'.
 					Subcommand handler received output: 'output'.
 
-					""", sb.ToString());
+					""".ReplaceLineEndings(), sb.ToString());
 			}
 
 			[Fact]
@@ -1277,7 +1277,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 					Subcommand handler received reference: 'project-reference'.
 					Subcommand handler received output: 'output'.
 
-					""", sb.ToString());
+					""".ReplaceLineEndings(), sb.ToString());
 			}
 		}
 		public class AndTwoRequiredSubcommandOptions : CommandLineBuilderTestingBase
@@ -1348,7 +1348,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -1460,7 +1460,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 					Subcommand handler received reference: 'project-reference'.
 					Subcommand handler received output: 'output'.
 
-					""", sb.ToString());
+					""".ReplaceLineEndings(), sb.ToString());
 			}
 
 			[Fact]
@@ -1509,7 +1509,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 					Subcommand handler received reference: 'project-reference'.
 					Subcommand handler received output: 'output'.
 
-					""", sb.ToString());
+					""".ReplaceLineEndings(), sb.ToString());
 			}
 		}
 		public class AndTwoSubcommandArguments : CommandLineBuilderTestingBase
@@ -1581,7 +1581,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-					""", OutStringBuilder.ToString());
+					""".ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -1668,7 +1668,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 					Subcommand handler received reference: 'project-reference'.
 					Subcommand handler received output: 'output'.
 
-					""", sb.ToString());
+					""".ReplaceLineEndings(), sb.ToString());
 			}
 
 			[Fact]
@@ -1768,7 +1768,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-					""", OutStringBuilder.ToString());
+					""".ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -1861,7 +1861,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 					Subcommand handler received reference: 'project-reference'.
 					Subcommand handler received output: ':output:'.
 
-					""", sb.ToString());
+					""".ReplaceLineEndings(), sb.ToString());
 			}
 
 		}
@@ -2002,7 +2002,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]
@@ -2082,7 +2082,7 @@ public class SubcommandTests : CommandLineBuilderTestingBase
 
 
 
-		              """, OutStringBuilder.ToString());
+		              """.ReplaceLineEndings(), OutStringBuilder.ToString());
 			}
 
 			[Fact]

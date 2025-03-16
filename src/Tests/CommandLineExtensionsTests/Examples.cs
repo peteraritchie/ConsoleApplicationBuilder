@@ -84,7 +84,7 @@ public partial class Examples : CommandLineBuilderTestingBase
 
 
 
-			""", OutStringBuilder.ToString());
+			""".ReplaceLineEndings(), OutStringBuilder.ToString());
 	}
 
 	[Fact]
@@ -118,7 +118,7 @@ public partial class Examples : CommandLineBuilderTestingBase
 
 
 
-			""", OutStringBuilder.ToString());
+			""".ReplaceLineEndings(), OutStringBuilder.ToString());
 	}
 
 	[Fact]
@@ -242,7 +242,7 @@ public partial class Examples : CommandLineBuilderTestingBase
 
 
 
-			""", outStringBuilder.ToString());
+			""".ReplaceLineEndings(), outStringBuilder.ToString());
 		outStringBuilder.Clear();
 
 		exitCode = command.Invoke(["--verbosity", "information"], console);
