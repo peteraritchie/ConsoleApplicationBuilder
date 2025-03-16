@@ -140,7 +140,7 @@ public class CommandLineExtensionsGivenCommandWithOneOptionShould : CommandLineB
 		Assert.Equal(0, command.Invoke(args));
 		Assert.True(fileInfoHandlerSpy.WasExecuted);
 		Assert.NotNull(fileInfoHandlerSpy.GivenFileInfo);
-		Assert.Equal(new FileInfo(@".\appsettings.json").FullName, fileInfoHandlerSpy.GivenFileInfo!.FullName);
+		Assert.Equal(new FileInfo("appsettings.json").FullName, fileInfoHandlerSpy.GivenFileInfo!.FullName);
 	}
 
 	[Fact]

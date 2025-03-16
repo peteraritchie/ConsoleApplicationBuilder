@@ -158,7 +158,7 @@ public partial class Examples : CommandLineBuilderTestingBase
 		Assert.Equal(0, exitCode);
 		Assert.Matches(DefineArgumentsOutputRegex(), OutStringBuilder.ToString());
 	}
-	[GeneratedRegex(@"\<delay\> argument = (\d+)\r\n\<message\> argument = (\w+)")]
+	[GeneratedRegex(@"\<delay\> argument = (\d+)(\r)?\n\<message\> argument = (\w+)")]
 	private static partial Regex DefineArgumentsOutputRegex();
 
 	[Fact]
