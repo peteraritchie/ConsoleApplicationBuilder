@@ -42,6 +42,35 @@ public partial class Examples : CommandLineBuilderTestingBase
 	[Fact]
 	public void TestSimpleExampleWithOption()
 	{
+		string[] args = ["appsettings.json"];
+
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand<ProcessFileCommand>()
+			.WithArgument<FileInfo>("file", "file path to process")
+			.WithOption<FileInfo?>("--output", "output location")
+			.AddAlias("-o")
+			.WithHandler((inputFileInfo, outputFileInfo) =>
+			{
+				var outputText =
+					$"File {inputFileInfo.Name} is {inputFileInfo.Length} bytes in size and was created on {inputFileInfo.CreationTime}";
+				if (outputFileInfo != null)
+				{
+					using var writer = outputFileInfo.CreateText();
+					writer.WriteLine(outputText);
+				}
+				else
+				{
+					Console.WriteLine(outputText);
+				}
+			});
+		var exitCode = builder.Build<ProcessFileCommand>().Invoke(args);
+
+		Assert.Equal(0, exitCode);
+	}
+
+	[Fact]
+	public void TestSimpleExampleWithRequiredOption()
+	{
 		string[] args = ["--file", "appsettings.json"];
 
 		var builder = ConsoleApplication.CreateBuilder(args);
@@ -57,12 +86,12 @@ public partial class Examples : CommandLineBuilderTestingBase
 	}
 
 	[Fact]
-	public void TestSimpleExampleWithOptionOutput()
+	public void TestSimpleExampleWithRequiredOptionOutput()
 	{
 		string[] args = [];
 
-		var builder = ConsoleApplication.CreateBuilder(args); // 👈 CAB
-		builder.Services.AddCommand<ProcessFileCommand>() // 👈 CLB starts
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand<ProcessFileCommand>()
 		  .WithRequiredOption<FileInfo>("--file", "file path to process")
 		  .WithHandler(fileInfo =>
 			  Console.WriteLine(
@@ -92,8 +121,8 @@ public partial class Examples : CommandLineBuilderTestingBase
 	{
 		string[] args = [];
 
-		var builder = ConsoleApplication.CreateBuilder(args); // 👈 CAB
-		builder.Services.AddCommand<ProcessFileCommand>() // 👈 CLB starts
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand<ProcessFileCommand>()
 		  .WithArgument<FileInfo>("file", "file path to process")
 		  .WithHandler(fileInfo =>
 			  Console.WriteLine(
@@ -162,15 +191,37 @@ public partial class Examples : CommandLineBuilderTestingBase
 	private static partial Regex DefineArgumentsOutputRegex();
 
 	[Fact]
-	public void DefineSubcommandAlias()
+	public void DefineSubcommands()
 	{
-		string[] args = ["read", "file.txt"];
+		string[] args = ["write", "file.txt", "text to write to file."];
 
 		var builder = ConsoleApplication.CreateBuilder(args);
 		builder.Services.AddCommand()
 			.WithSubcommand<ReadCommand>()
+				.WithArgument<FileInfo>("file", "file path to process")
+				.WithSubcommandHandler(file => Console.WriteLine($"read <file> argument = {file.Name}"))
+			.WithSubcommand<WriteCommand>()
+				.WithArgument<FileInfo>("file", "file path to process.")
+				.WithArgument<string>("text", "text to write to file, quoted.")
+				.WithSubcommandHandler((file, text) => Console.WriteLine($"write <file> argument = {file.Name} with text '{text}'."))
+			.WithHandler(() => Console.WriteLine("Please choose read or write subcommand."));
+		var exitCode = builder.Build<RootCommand>().Invoke(args, Console);
+		Assert.Empty(ErrStringBuilder.ToString());
+		Assert.Equal(0, exitCode);
+		Assert.Matches(DefineSubcommandsArgumentsOutputRegex(), OutStringBuilder.ToString());
+	}
+
+	[Fact]
+	public void DefineSubcommandAlias()
+	{
+		string[] args = ["r", "file.txt"];
+
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithSubcommand<ReadCommand>()
+			.AddAlias("r")
 			.WithArgument<FileInfo>("file", "file path to process")
-			.WithSubcommandHandler(file => Console.WriteLine($"<file> argument = {file.Name}"))
+			.WithSubcommandHandler(file => Console.WriteLine($"read <file> argument = {file.Name}"))
 			.WithHandler(() => { });
 		var exitCode = builder.Build<RootCommand>().Invoke(args, Console);
 		Assert.Empty(ErrStringBuilder.ToString());
@@ -179,6 +230,7 @@ public partial class Examples : CommandLineBuilderTestingBase
 	}
 
 	public class ReadCommand() : Command("read", "read subcommand");
+	public class WriteCommand() : Command("write", "write subcommand");
 
 	public enum Verbosities
 	{
@@ -270,6 +322,8 @@ public partial class Examples : CommandLineBuilderTestingBase
 
 	[GeneratedRegex(@"File (.*) is (\d+) bytes in size and was created on (.*)\.")]
 	private static partial Regex FileProcessorOutputRegex();
+	[GeneratedRegex(@"write \<file\> argument = file\.txt with text 'text to write to file.'")]
+	private static partial Regex DefineSubcommandsArgumentsOutputRegex();
 	[GeneratedRegex(@"\<file\> argument = file\.txt")]
 	private static partial Regex DefineSubcommandArgumentsOutputRegex();
 }
