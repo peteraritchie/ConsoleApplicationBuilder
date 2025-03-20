@@ -8,15 +8,6 @@ parameters:
   - Quiet
   - Diagnostic
   - Minimal
-- name: versionSuffixType
-  displayName: Nuget Version Suffix Type
-  type: string
-  default: none
-  values:
-  - rc.
-  - beta.
-  - alpha.
-  - none
 
 trigger:
   branches:
@@ -24,8 +15,8 @@ trigger:
       - main
   paths:
     include:
-      - src/dotnet-new-template
-      - .azuredevops/cd-template.yml
+      - src/CommandLineExtensions
+      - .azuredevops/ci-CommandLineExtensions.yml
       - .azuredevops/templates
 
 pr: none
@@ -34,26 +25,28 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  majorVersion: 1
+  majorVersion: 0
   minorVersion: 1
+  projects: 'src/CommandLineExtensions/*.csproj'
   dotNetVersion: '8.x'
-  sourceDir: 'src/dotnet-new-template'
   buildConfiguration: 'Release'
-  nugetServiceConnection: 'Nuget - PRI.ConsoleApplicationBuilder' # 'TestNuGet - PRI-ConsoleApplicationBuilder'
-  patchVersion: $[counter(format('{0}-{1}', variables['majorVersion'], variables['minorVersion']), 0)]
-  buildVersion: $[counter(format('{0}-{1}-{2}', variables['majorVersion'], variables['minorVersion'], variables['versionSuffixType']), 0)]
-  ${{ if not( eq(parameters['versionSuffixType'], 'none') ) }}:
-    versionSuffix: '-${{ parameters.versionSuffixType }}$(buildVersion)'
+  nugetServiceConnection: 'TestNuGet - PRI-CommandLineExtensions' # 'Nuget - PRI.CommandLineExtensions'
+  testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
+  ${{ if eq(parameters.verbosity, 'Quiet') }}:
+    dotnetVerbosity: q # Quiet
+  ${{ elseif eq(parameters.verbosity, 'Detailed') }}:
+    dotnetVerbosity: d # Detailed
+  ${{ elseif eq(parameters.verbosity, 'Diagnostic') }}:
+    dotnetVerbosity: diag # Diagnostic
   ${{ else }}:
-    versionSuffix: ''
-  packageVersion: '$(majorVersion).$(minorVersion).$(patchVersion)$(versionSuffix)'
+    dotnetVerbosity: m # Minimal
 
 stages:
-- stage: build
-  displayName: 'Build'
+- stage: build_test
+  displayName: 'Build and Test'
   jobs:
   - job: Build
-    displayName: 'Build'
+    displayName: 'Build and Test'
     steps:
       - task: UseDotNet@2
         displayName: 'Use .NET SDK $(dotNetVersion)'
@@ -65,23 +58,34 @@ stages:
         displayName: 'Restore project dependencies'
         inputs:
           command: 'restore'
-          projects: '$(sourceDir)/**/*.csproj'
+          projects: $(projects)
           verbosityRestore: '${{ parameters.verbosity }}'
 
       - task: DotNetCoreCLI@2
-        displayName: 'Pack'
+        # run tests and publish results/coverage to Azure DevOps
+        displayName: 'Dotnet Build/Test - $(buildConfiguration)'
         inputs:
-          command: 'pack'
-          configuration: '$(buildConfiguration)'
-          verbosityPack: '${{ parameters.verbosity }}'
-          packagesToPack: '$(sourceDir)/Pri.ConsoleApplicationBuilder.Templates.csproj'
-          buildProperties: 'Version=$(packageVersion)'
+          command: 'test'
+          projects: $(testProjects)
+          arguments: >-
+              --no-restore
+              -c $(buildConfiguration)
+              --nologo
+              -v $(dotnetVerbosity)
+              /clp:ErrorsOnly
+              --collect "Code coverage"
+          testRunTitle: 'Dotnet Test - $(buildConfiguration)'
 
-      - task: PublishPipelineArtifact@1
-        inputs:
-          artifactName: 'NuGet'
-          targetPath: '$(Build.ArtifactStagingDirectory)'
-          publishLocation: 'pipeline'
+  - template: templates/jobs/build-and-pack-nuget-job.yml
+    parameters:
+      displayName: 'Pack NuGet'
+      dependsOn: 'Build'
+      majorVersion: ${{ variables.majorVersion }}
+      minorVersion: ${{ variables.minorVersion }}
+      versionSuffixType: 'rc'
+      dotNetVersion: $(dotNetVersion)
+      projects: $(projects)
+      packagesToPack: 'src/CommandLineExtensions/Pri.CommandLineExtensions.csproj'
 
 # to create a service connection for NuGet
 #   - see also: https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops&tabs=yaml
@@ -89,7 +93,7 @@ stages:
 #   - see also: https://learn.microsoft.com/en-us/azure/deployment-environments/how-to-create-access-environments
 - stage: nuget_publish
   displayName: 'NuGet Publish'
-  dependsOn: build
+  dependsOn: build_test
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   jobs:
   - deployment: nuget_push
@@ -103,7 +107,6 @@ stages:
               inputs:
                 artifact: 'NuGet'
                 targetPath: '$(Build.ArtifactStagingDirectory)'
-
             - task: NuGetCommand@2
               displayName: 'NuGet Push'
               inputs:

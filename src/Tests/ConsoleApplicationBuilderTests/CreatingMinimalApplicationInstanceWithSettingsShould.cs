@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Configuration;
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
+using Pri.ConsoleApplicationBuilder;
 
-namespace Pri.ConsoleApplicationBuilder.Tests;
+namespace ConsoleApplicationBuilderTests;
 
-[Collection("Environment")]
+[Collection("Isolated Execution Collection")]
 public class CreatingMinimalApplicationInstanceWithSettingsShould
 {
 	[Fact]

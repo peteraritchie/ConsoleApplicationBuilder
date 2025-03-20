@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Hosting;
 
 namespace Pri.ConsoleApplicationBuilder;
 
+/// <summary>
+/// Represents a console application builder which helps manage configuration, logging, lifetime, and more.
+/// </summary>
 public interface IConsoleApplicationBuilder : IHostApplicationBuilder
 {
 

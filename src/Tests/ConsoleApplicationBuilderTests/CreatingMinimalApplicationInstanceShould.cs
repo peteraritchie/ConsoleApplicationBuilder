@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 
-namespace Pri.ConsoleApplicationBuilder.Tests;
+using Pri.ConsoleApplicationBuilder;
 
-[Collection("Environment")]
+namespace ConsoleApplicationBuilderTests;
+
+[Collection("Isolated Execution Collection")]
 public class CreatingMinimalApplicationInstanceShould
 {
 	[Fact]
@@ -72,7 +74,6 @@ public class CreatingMinimalApplicationInstanceShould
 		{
 			var builder = ConsoleApplication.CreateBuilder([]);
 			Assert.EndsWith("..", builder.Environment.ContentRootPath);
-			var o = builder.Build<Program>();
 		}
 		finally
 		{
@@ -88,7 +89,6 @@ public class CreatingMinimalApplicationInstanceShould
 		{
 			var builder = ConsoleApplication.CreateBuilder([]);
 			Assert.Equal("/", builder.Environment.ContentRootPath);
-			var o = builder.Build<Program>();
 		}
 		finally
 		{
@@ -139,10 +139,8 @@ public class CreatingMinimalApplicationInstanceShould
 		{
 			var builder = ConsoleApplication.CreateBuilder([]);
 			var o = builder.Build<Program>();
-			if (o.Configuration is ConfigurationManager r)
-			{
-				var s = r.Sources;
-			}
+			var configurationManager = Assert.IsType<ConfigurationManager>(o.Configuration);
+			Assert.NotNull(configurationManager.Sources);
 		}
 		finally
 		{

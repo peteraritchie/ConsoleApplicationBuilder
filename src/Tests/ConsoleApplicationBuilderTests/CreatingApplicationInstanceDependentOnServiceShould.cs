@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Pri.ConsoleApplicationBuilder.Tests;
+using Pri.ConsoleApplicationBuilder;
+
+namespace ConsoleApplicationBuilderTests;
 
 public class CreatingApplicationInstanceDependentOnServiceShould
 {

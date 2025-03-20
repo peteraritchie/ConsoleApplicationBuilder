@@ -1,7 +1,9 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 
-namespace Pri.ConsoleApplicationBuilder.Tests;
+using Pri.ConsoleApplicationBuilder;
+
+namespace ConsoleApplicationBuilderTests;
 
 public class ConfigureContainerShould
 {
