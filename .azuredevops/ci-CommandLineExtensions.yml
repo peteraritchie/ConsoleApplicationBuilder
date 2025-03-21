@@ -27,6 +27,7 @@ pool:
 variables:
   majorVersion: 0
   minorVersion: 1
+  versionSuffixType: 'rc'
   projects: 'src/CommandLineExtensions/*.csproj'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
@@ -82,7 +83,7 @@ stages:
       dependsOn: 'Build'
       majorVersion: ${{ variables.majorVersion }}
       minorVersion: ${{ variables.minorVersion }}
-      versionSuffixType: 'rc'
+      versionSuffixType: ${{ variables.versionSuffixType }}
       dotNetVersion: $(dotNetVersion)
       projects: $(projects)
       packagesToPack: 'src/CommandLineExtensions/Pri.CommandLineExtensions.csproj'
