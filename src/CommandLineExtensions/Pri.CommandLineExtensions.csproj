@@ -17,6 +17,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet .net console System.CommandLine command-line dependency-injection</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageId>PRI.CommandLineExtensions</PackageId>
   </PropertyGroup>
 
