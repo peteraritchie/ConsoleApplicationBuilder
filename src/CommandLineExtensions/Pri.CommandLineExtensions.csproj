@@ -17,7 +17,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet .net console System.CommandLine command-line dependency-injection</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
-    <PackageId>PRI.ConsoleApplicationBuilder</PackageId>
+    <PackageId>PRI.CommandLineExtensions</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
