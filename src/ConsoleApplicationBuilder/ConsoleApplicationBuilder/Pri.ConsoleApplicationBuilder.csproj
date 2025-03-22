@@ -17,6 +17,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet .net console application-builder dependency-injection</PackageTags>
     <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageId>PRI.ConsoleApplicationBuilder</PackageId>
   </PropertyGroup>
 
