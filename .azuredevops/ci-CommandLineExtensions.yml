@@ -25,13 +25,13 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  majorVersion: 0
-  minorVersion: 1
-  versionSuffixType: 'rc'
+  majorVersion: 1
+  minorVersion: 0
+  versionSuffixType: 'none'
   projects: 'src/CommandLineExtensions/*.csproj'
   dotNetVersion: '8.x'
   buildConfiguration: 'Release'
-  nugetServiceConnection: 'TestNuGet - PRI-CommandLineExtensions' # 'Nuget - PRI.CommandLineExtensions'
+  nugetServiceConnection: 'Nuget - PRI.ConsoleApplicationBuilder' # 'TestNuGet - PRI-CommandLineExtensions'
   testProjects: 'src/Tests/Pri.ConsoleApplicationBuilder.Tests.csproj'
   ${{ if eq(parameters.verbosity, 'Quiet') }}:
     dotnetVerbosity: q # Quiet

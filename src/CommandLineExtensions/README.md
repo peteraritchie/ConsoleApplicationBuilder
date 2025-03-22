@@ -4,7 +4,7 @@ CommandLineExtensions helps make command line argument parsing simple while exte
 
 ## Mission
 
-To leverage ConnsoleApplicationBuilder to create a simple way to define and process command-line parameters with a fluent interface.
+To leverage ConsoleApplicationBuilder to create a simple way to define and process command-line parameters with a fluent interface.
 
 ## Designed with ConsoleApplicationBuilder in mind.
 
@@ -62,7 +62,7 @@ Options:
 
 ### Injection
 
-System.CommandLine does not enherently support .NET dependency injection. CommandLineExtensions enables dependency injection via ConsoleApplicationBuider. Commands added through the `AddCommand` extension method automatically levage dependency inject and any types that are instantiated by CommandLineExtensions will have dependencies resolved. For example:
+System.CommandLine does not inherently support .NET dependency injection. CommandLineExtensions enables dependency injection via ConsoleApplicationBuilder. Commands added through the `AddCommand` extension method automatically leverage dependency inject and any types that are instantiated by CommandLineExtensions will have dependencies resolved. For example:
 
 ```csharp
 var builder = ConsoleApplication.CreateBuilder(args);
@@ -216,11 +216,11 @@ return builder.Build<RootCommand>().Invoke(args, Console);
 
 ### Typed command handlers
 
-One of the intents of CommandLineExtensions is to help make complex command-line applications simpler. Lambas make for self-contained, easy-to-read examples; but they're not indicative of real-world, non-trival applications. Complex applications often use tried-and-true object-oriented techniques to address complexity. Techniques like type encapsulation are used to encapsulate specific data and logic from other concerns of the application. A command handler, for example, may be encapsulated in a class declaration. CommandLineExtensions supports types that implement built-in interfaces `I`
+One of the intents of CommandLineExtensions is to help make complex command-line applications simpler. Lambdas make for self-contained, easy-to-read examples; but they're not indicative of real-world, non-trivial applications. Complex applications often use tried-and-true object-oriented techniques to address complexity. Techniques like type encapsulation are used to encapsulate specific data and logic from other concerns of the application. A command handler, for example, may be encapsulated in a class declaration. CommandLineExtensions supports types that implement built-in interface `Pri.CommandLineExtensions.ICommandHandler`.
 
-## Limitiations and known issues
+## Limitations and known issues
 
-This is the first, MVP release of CommandLineExtensions. It has some limitations and doesn't support all the features of System.CommandLine. CommandLineExtensions is intended to be simpler than Systme.CommandLine extensions and tries to address the most common command-line arguments/commands needs and is unlikely to ever have parity with System.CommandLine. Here are some of the limitiations and known issues with CommandLineExtensions:
+This is the first, MVP release of CommandLineExtensions. It has some limitations and doesn't support all the features of System.CommandLine. CommandLineExtensions is intended to be simpler than System.CommandLine extensions and tries to address the most common command-line arguments/commands needs and is unlikely to ever have parity with System.CommandLine. Here are some of the limitations and known issues with CommandLineExtensions:
 
 - `FromAmong` isn't directly supported, use the `enum` support instead.
 - parameters (arguments, options) are limited to two. Support for more parameters is [planned for the future](https://github.com/peteraritchie/ConsoleApplicationBuilder/issues/12).
