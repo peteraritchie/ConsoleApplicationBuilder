@@ -57,6 +57,8 @@ internal class DefaultConsoleApplicationBuilder : IConsoleApplicationBuilder
 			}
 		}
 
+		Configuration.AddEnvironmentVariables();
+
 		if (args.Length > 0 )
 		{
 			Configuration.AddCommandLine(args);
