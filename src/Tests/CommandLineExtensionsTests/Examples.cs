@@ -1,8 +1,11 @@
 ﻿using System.CommandLine;
+using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
 using CommandLineExtensionsTests.TestDoubles;
+
+using Microsoft.Extensions.Logging;
 
 using Pri.CommandLineExtensions;
 using Pri.ConsoleApplicationBuilder;
@@ -21,6 +24,28 @@ public partial class Examples : CommandLineBuilderTestingBase
 	{
 		(outStringBuilder, errStringBuilder, console) = BuildConsoleSpy();
 		stdOutBuffer = new StringWriter();
+	}
+
+	public class LoggingCommandHandler(ILogger<LoggingCommandHandler> logger) : ICommandHandler<FileInfo>
+	{
+		public int Execute(FileInfo fileInfo)
+		{
+			Debug.Assert(logger is not null);
+			return 0;
+		}
+	}
+
+	[Fact]
+	public void InjectLoggerIntoHandlerInstance()
+	{
+		string[] args = ["file.txt"];
+
+		var builder = ConsoleApplication.CreateBuilder(args);
+		builder.Services.AddCommand()
+			.WithDescription("Dependency Injection sample")
+			.WithOption<FileInfo>("--file", "file path to process.")
+			.WithHandler<LoggingCommandHandler>();
+		var exitCode = builder.Build<RootCommand>().Invoke(args);
 	}
 
 	[Fact]
