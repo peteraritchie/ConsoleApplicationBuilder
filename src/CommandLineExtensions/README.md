@@ -62,7 +62,7 @@ Options:
 
 ### Injection
 
-System.CommandLine does not inherently support .NET dependency injection. CommandLineExtensions enables dependency injection via ConsoleApplicationBuilder. Commands added through the `AddCommand` extension method automatically leverage dependency inject and any types that are instantiated by CommandLineExtensions will have dependencies resolved. For example:
+System.CommandLine does not inherently support .NET dependency injection. CommandLineExtensions enables dependency injection via ConsoleApplicationBuilder. Commands added through the `AddCommand` extension method automatically leverage dependency injection and any types that are instantiated by CommandLineExtensions will have dependencies resolved. For example:
 
 ```csharp
 var builder = ConsoleApplication.CreateBuilder(args);
@@ -196,7 +196,7 @@ public class WriteCommand() : Command("write", "write subcommand");
 
 ### Subcommand Aliases
 
-Line options, subcommands may have aliases.  For example, the above read/write subcommands example could have aliases `r` and `w` for `read` and `write`:
+Like options, subcommands may have aliases.  For example, the above read/write subcommands example could have aliases `r` and `w` for `read` and `write`:
 
 ```csharp
 var builder = ConsoleApplication.CreateBuilder(args);
@@ -223,10 +223,10 @@ One of the intents of CommandLineExtensions is to help make complex command-line
 This is the first, MVP release of CommandLineExtensions. It has some limitations and doesn't support all the features of System.CommandLine. CommandLineExtensions is intended to be simpler than System.CommandLine extensions and tries to address the most common command-line arguments/commands needs and is unlikely to ever have parity with System.CommandLine. Here are some of the limitations and known issues with CommandLineExtensions:
 
 - `FromAmong` isn't directly supported, use the `enum` support instead.
-- parameters (arguments, options) are limited to two. Support for more parameters is [planned for the future](https://github.com/peteraritchie/ConsoleApplicationBuilder/issues/12).
+- Parameters (arguments, options) are limited to two. Support for more parameters is [planned for the future](https://github.com/peteraritchie/ConsoleApplicationBuilder/issues/12).
 - There is no support for `Option<T>`-derived types. CommandLineExtensions focuses on a fluent interface, but support for this [may be added](
 https://github.com/peteraritchie/ConsoleApplicationBuilder/issues/13) in the future.
-- Default value factories are not support, only compile-time constant defaults. Support for this in System.CommandLine seems to be more complex that it's worth (requiring custom help messages, etc.)
+- Default value factories are not supported, only compile-time constants or config-time values. Support for default value factories in System.CommandLine is more complex than it's worth (requiring custom help messages, etc.)
 - Global options are not yet supported.
 - Custom help is not supported.
 - Unmatched tokens is not supported.
