@@ -18,7 +18,7 @@ internal class OneParameterSubcommandBuilder<TParam, TSubcommand, TParentBuilder
 {
 	internal TParentBuilder ParentBuilder { get; }
 	private Func<TParam, Task>? handler;
-	private ParseArgument<TParam>? parseArgument;
+	//private ParseArgument<TParam>? parseArgument;
 
 	private OneParameterSubcommandBuilder(SubcommandBuilder<TSubcommand, TParentBuilder> initiator)
 		: base(initiator)
@@ -52,7 +52,7 @@ internal class OneParameterSubcommandBuilder<TParam, TSubcommand, TParentBuilder
 	/// <inheritsdoc />
 	public IOneParameterSubcommandBuilder<TParam, TSubcommand, TParentBuilder> WithArgumentParser(ParseArgument<TParam> argumentParser)
 	{
-		parseArgument = argumentParser;
+		ParamSpecs.Last().ArgumentParser = argumentParser;
 
 		return this;
 	}
@@ -153,7 +153,7 @@ internal class OneParameterSubcommandBuilder<TParam, TSubcommand, TParentBuilder
 
 		var paramSpec = ParamSpecs[0];
 
-		IValueDescriptor<TParam> descriptor = subcommand.AddParameter(paramSpec, parseArgument);
+		IValueDescriptor<TParam> descriptor = subcommand.AddParameter(paramSpec, paramSpec.ArgumentParser as ParseArgument<TParam>);
 
 		subcommand.SetHandler(context =>
 		{

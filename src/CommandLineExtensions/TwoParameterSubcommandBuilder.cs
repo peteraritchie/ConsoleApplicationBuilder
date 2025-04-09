@@ -16,7 +16,6 @@ internal class TwoParameterSubcommandBuilder<TParam1, TParam2, TSubcommand, TPar
 {
 	internal TParentBuilder ParentBuilder { get; }
 	private Func<TParam1, TParam2, Task>? handler;
-	private ParseArgument<TParam2>? parseArgument;
 
 	private TwoParameterSubcommandBuilder(OneParameterSubcommandBuilder<TParam1, TSubcommand, TParentBuilder> initiator)
 		: base(initiator)
@@ -39,7 +38,7 @@ internal class TwoParameterSubcommandBuilder<TParam1, TParam2, TSubcommand, TPar
 	/// <inheritsdoc />
 	public ITwoParameterSubcommandBuilder<TParam1, TParam2, TSubcommand, TParentBuilder> WithArgumentParser(ParseArgument<TParam2> argumentParser)
 	{
-		parseArgument = argumentParser;
+		ParamSpecs.Last().ArgumentParser = argumentParser;
 
 		return this;
 	}
@@ -126,8 +125,8 @@ internal class TwoParameterSubcommandBuilder<TParam1, TParam2, TSubcommand, TPar
 			actualHandler = (p1, p2) => handler(p1, p2);
 		}
 
-		var descriptor1 = subcommand.AddParameter<TParam1>(ParamSpecs[0]); // TODO: Support args parsing in subcommands
-		var descriptor2 = subcommand.AddParameter<TParam2>(ParamSpecs[1], parseArgument);
+		var descriptor1 = subcommand.AddParameter<TParam1>(ParamSpecs[0], ParamSpecs[0].ArgumentParser as ParseArgument<TParam1>);
+		var descriptor2 = subcommand.AddParameter<TParam2>(ParamSpecs[1], ParamSpecs[1].ArgumentParser as ParseArgument<TParam2>);
 		subcommand.SetHandler(context =>
 		{
 			var value1 = GetValue(descriptor1, context);

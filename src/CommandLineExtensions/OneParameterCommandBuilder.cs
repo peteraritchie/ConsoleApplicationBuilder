@@ -22,7 +22,6 @@ internal class OneParameterCommandBuilder<TParam>
 		=> ParamSpecs.Add(paramSpec);
 
 	private Func<TParam, Task>? handler;
-	private ParseArgument<TParam>? parseArgument;
 
 	/// <summary>
 	/// A Builder the builds out a command with one option or argument
@@ -119,7 +118,7 @@ internal class OneParameterCommandBuilder<TParam>
 	/// <inheritsdoc />
 	public IOneParameterCommandBuilder<TParam> WithArgumentParser(ParseArgument<TParam> argumentParser)
 	{
-		parseArgument = argumentParser;
+		ParamSpecs.Last().ArgumentParser = argumentParser;
 		return this;
 	}
 
@@ -243,7 +242,7 @@ internal class OneParameterCommandBuilder<TParam>
 
 		var paramSpec = ParamSpecs[0];
 
-		IValueDescriptor<TParam> descriptor = command.AddParameter(paramSpec, parseArgument);
+		IValueDescriptor<TParam> descriptor = command.AddParameter(paramSpec, ParamSpecs[0].ArgumentParser as ParseArgument<TParam>);
 
 		command.SetHandler(context =>
 		{
