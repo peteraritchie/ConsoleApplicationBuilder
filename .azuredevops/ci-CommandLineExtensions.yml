@@ -108,6 +108,8 @@ stages:
               inputs:
                 artifact: 'NuGet'
                 targetPath: '$(Build.ArtifactStagingDirectory)'
+            - task: NuGetAuthenticate@1
+              displayName: 'Authenticate with NuGet'
             - task: NuGetCommand@2
               displayName: 'NuGet Push'
               inputs:
