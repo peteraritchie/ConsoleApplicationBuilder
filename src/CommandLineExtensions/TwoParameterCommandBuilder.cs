@@ -16,7 +16,6 @@ internal class TwoParameterCommandBuilder<TParam1, TParam2>
 	: CommandBuilderBase, ITwoParameterCommandBuilder<TParam1, TParam2>
 {
 	private Func<TParam1, TParam2, Task>? handler;
-	private ParseArgument<TParam2>? parseArgument;
 
 	/// <summary>
 	/// terminal builder, if we add more this will have to check `action` in `AddOption`
@@ -40,7 +39,7 @@ internal class TwoParameterCommandBuilder<TParam1, TParam2>
 	/// <inheritsdoc />
 	public ITwoParameterCommandBuilder<TParam1, TParam2> WithArgumentParser(ParseArgument<TParam2> argumentParser)
 	{
-		parseArgument = argumentParser;
+		ParamSpecs.Last().ArgumentParser = argumentParser;
 		return this;
 	}
 
@@ -190,8 +189,8 @@ internal class TwoParameterCommandBuilder<TParam1, TParam2>
 			                throw new InvalidOperationException("Cannot build a command without a handler.");
 		}
 
-		var descriptor1 = command.AddParameter<TParam1>(ParamSpecs[0]);
-		var descriptor2 = command.AddParameter<TParam2>(ParamSpecs[1], parseArgument);
+		var descriptor1 = command.AddParameter<TParam1>(ParamSpecs[0], ParamSpecs[0].ArgumentParser as ParseArgument<TParam1>);
+		var descriptor2 = command.AddParameter<TParam2>(ParamSpecs[1], ParamSpecs[1].ArgumentParser as ParseArgument<TParam2>);
 
 		command.SetHandler(context =>
 		{

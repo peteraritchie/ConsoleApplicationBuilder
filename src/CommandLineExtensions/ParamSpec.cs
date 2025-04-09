@@ -1,4 +1,6 @@
-﻿namespace Pri.CommandLineExtensions;
+﻿using System.CommandLine.Parsing;
+
+namespace Pri.CommandLineExtensions;
 
 /// <summary>
 /// A data model for to specify the attribute used to create a parameter (Option&lt;T&gt;/Argument&lt;T&gt;)
@@ -11,4 +13,5 @@ public record ParamSpec
 	public bool IsArgument { get; init; } = false;
 	public List<string> Aliases { get; } = [];
 	public object? DefaultValue { get; set; }
+	public object ArgumentParser { get; set; }
 }
